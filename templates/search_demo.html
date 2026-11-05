@@ -1,0 +1,572 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Record Search & Staff Lookup Workbench{% endblock %}
+
+{% block content %}
+<div class="search-workbench-container">
+    <div class="page-header">
+        <div>
+            <h1>🔍 Hospital Express Search & Staff Lookup Workbench</h1>
+            <p class="subtitle">Practical Clinical Retrieval: Flexible Record Scanning vs. Express ID Direct Lookup</p>
+        </div>
+        <div>
+            <a href="{{ url_for('phase3') }}" class="btn btn-secondary">← Back to Search & Sorter Hub</a>
+        </div>
+    </div>
+
+    <!-- Interactive Search Controls -->
+    <div class="control-card">
+        <h2>🛠️ Hospital Search Execution Panel</h2>
+        <div class="controls-grid">
+            <div class="control-group">
+                <label for="dataset-select"><strong>1. Select Hospital Records:</strong></label>
+                <select id="dataset-select" class="form-control" onchange="handleDatasetChange()">
+                    <option value="doctors">👨‍⚕️ Doctors Roster ({{ doctors|length }} specialists)</option>
+                    <option value="patients">👥 Patients Intake ({{ patients|length }} active files)</option>
+                    <option value="appointments">📅 Appointments ({{ appointments|length }} bookings)</option>
+                    <option value="custom">🔢 Custom Patient/Staff Numbers</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="search-by-group">
+                <label for="search-by-select"><strong>2. Search By Field:</strong></label>
+                <select id="search-by-select" class="form-control">
+                    <option value="id">Staff ID (Numeric)</option>
+                    <option value="name">Doctor Name (Text)</option>
+                    <option value="specialization">Medical Specialty</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="target-input"><strong>3. Search Term / ID:</strong></label>
+                <input type="text" id="target-input" class="form-control" placeholder="Enter ID or name (e.g. 101, Sarah)..." value="103">
+            </div>
+
+            <div class="control-group">
+                <label for="algorithm-select"><strong>4. Search Method:</strong></label>
+                <select id="algorithm-select" class="form-control">
+                    <option value="compare">⚡ Compare Both (Flexible Scan vs. Express ID)</option>
+                    <option value="linear">🔍 Flexible Record Search (Full profile text scan)</option>
+                    <option value="binary">⚡ Express ID Direct Lookup (Direct interval bisection)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="custom-data-container" style="display: none; margin-top: 15px;">
+            <label for="custom-data-input"><strong>Custom Record IDs (Comma-Separated):</strong></label>
+            <input type="text" id="custom-data-input" class="form-control" value="12, 25, 33, 47, 51, 68, 74, 89, 95, 110, 134, 150">
+        </div>
+
+        <div class="actions-bar" style="margin-top: 20px; display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="executeSearch()">▶ Search Hospital Records</button>
+            <button class="btn btn-secondary" onclick="resetSearch()">Reset</button>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="search-results-section" style="display: none;">
+        <!-- Comparison Summary Banner -->
+        <div id="comparison-banner" class="comparison-banner"></div>
+
+        <!-- Dual Side-by-Side View -->
+        <div class="results-grid">
+            <!-- Flexible Search Card -->
+            <div class="result-card" id="linear-result-card">
+                <div class="card-header linear-header">
+                    <h3>🔍 Flexible Medical Record Search</h3>
+                    <span class="complexity-tag">Full Profile Scan</span>
+                </div>
+                <div class="card-body">
+                    <div class="stats-summary" id="linear-stats"></div>
+                    <h4>Sequential Inspection Log</h4>
+                    <div class="trace-container" id="linear-trace"></div>
+                </div>
+            </div>
+
+            <!-- Express ID Lookup Card -->
+            <div class="result-card" id="binary-result-card">
+                <div class="card-header binary-header">
+                    <h3>⚡ Express ID Direct Lookup</h3>
+                    <span class="complexity-tag">Direct Interval Bisection</span>
+                </div>
+                <div class="card-body">
+                    <div class="stats-summary" id="binary-stats"></div>
+                    <h4>Interval Bisection Decision Steps</h4>
+                    <div class="trace-container" id="binary-trace"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- High-Traffic Reception Load Simulator -->
+    <div class="benchmark-card">
+        <h2>🏥 High-Volume Reception Load Simulator (Desk Stress Test)</h2>
+        <p>Simulate retrieval response times at busy hospital reception desks handling 50 to 10,000 active patient and staff records.</p>
+        
+        <div class="benchmark-controls">
+            <div class="control-group">
+                <label for="bench-size"><strong>Database Volume:</strong></label>
+                <select id="bench-size" class="form-control">
+                    <option value="50">50 Hospital Records (Small Clinic)</option>
+                    <option value="200">200 Hospital Records (Daily Outpatient)</option>
+                    <option value="1000" selected>1,000 Hospital Records (District Hospital)</option>
+                    <option value="5000">5,000 Hospital Records (Regional Medical Center)</option>
+                    <option value="10000">10,000 Hospital Records (Metro Hospital Archive)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="bench-pos"><strong>Patient Record Location:</strong></label>
+                <select id="bench-pos" class="form-control">
+                    <option value="best">First Patient in Registry (Front of Queue)</option>
+                    <option value="middle" selected>Patient in Middle of Hospital Directory</option>
+                    <option value="worst">Last Patient Registered (End of Roster)</option>
+                    <option value="missing">Unregistered Patient (File Not on Record)</option>
+                </select>
+            </div>
+
+            <div class="control-group" style="align-self: flex-end;">
+                <button class="btn btn-warning-action" onclick="runBenchmark()">⚡ Simulate Terminal Search</button>
+            </div>
+        </div>
+
+        <div id="benchmark-results" style="margin-top: 25px; display: none;"></div>
+    </div>
+</div>
+
+<style>
+.search-workbench-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    font-size: 1.7em;
+}
+
+.subtitle {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.95em;
+}
+
+.control-card, .benchmark-card {
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+.control-card h2, .benchmark-card h2 {
+    color: #1e293b;
+    margin-bottom: 18px;
+    font-size: 1.3em;
+}
+
+.controls-grid, .benchmark-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.control-group label {
+    font-size: 0.9em;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95em;
+    background: white;
+    color: #1e293b;
+}
+
+.comparison-banner {
+    padding: 18px 24px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    font-size: 1.05em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 25px;
+    margin-bottom: 35px;
+}
+
+.result-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.linear-header {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.binary-header {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.15em;
+}
+
+.complexity-tag {
+    background: rgba(255,255,255,0.25);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 22px;
+}
+
+.stats-summary {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 18px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9em;
+}
+
+.stats-summary p {
+    margin: 4px 0;
+}
+
+.trace-container {
+    max-height: 380px;
+    overflow-y: auto;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+}
+
+.trace-step {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.88em;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.trace-step:nth-child(even) {
+    background: #fbfcfe;
+}
+
+.trace-step.match {
+    background: #dcfce7 !important;
+    border-left: 4px solid #16a34a;
+}
+
+.trace-meta {
+    font-weight: 700;
+    color: #475569;
+}
+
+.btn-warning-action {
+    background: #f59e0b;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-warning-action:hover {
+    background: #d97706;
+}
+
+.benchmark-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+    margin-top: 15px;
+}
+
+.benchmark-table th, .benchmark-table td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.benchmark-table th {
+    background: #f8fafc;
+    color: #475569;
+}
+</style>
+
+<script>
+function handleDatasetChange() {
+    const ds = document.getElementById('dataset-select').value;
+    const searchBySelect = document.getElementById('search-by-select');
+    const customDataContainer = document.getElementById('custom-data-container');
+    const targetInput = document.getElementById('target-input');
+    
+    if (ds === 'custom') {
+        customDataContainer.style.display = 'block';
+        document.getElementById('search-by-group').style.display = 'none';
+        targetInput.value = '74';
+    } else {
+        customDataContainer.style.display = 'none';
+        document.getElementById('search-by-group').style.display = 'flex';
+        searchBySelect.innerHTML = '';
+        if (ds === 'doctors') {
+            searchBySelect.innerHTML = `
+                <option value="id">Staff ID (Numeric)</option>
+                <option value="name">Doctor Name (Text)</option>
+                <option value="specialization">Specialization</option>
+            `;
+            targetInput.value = '101';
+        } else if (ds === 'patients') {
+            searchBySelect.innerHTML = `
+                <option value="id">Patient File ID (Numeric)</option>
+                <option value="name">Patient Name (Text)</option>
+            `;
+            targetInput.value = '201';
+        } else if (ds === 'appointments') {
+            searchBySelect.innerHTML = `
+                <option value="id">Appointment ID (Numeric)</option>
+                <option value="patient">Patient Name</option>
+                <option value="doctor">Doctor Name</option>
+                <option value="date">Appointment Date</option>
+            `;
+            targetInput.value = '1';
+        }
+    }
+}
+
+function executeSearch() {
+    const dataset = document.getElementById('dataset-select').value;
+    const searchBy = document.getElementById('search-by-select').value;
+    const target = document.getElementById('target-input').value.trim();
+    const algorithm = document.getElementById('algorithm-select').value;
+    
+    if (!target) {
+        alert('Please enter a search target.');
+        return;
+    }
+    
+    let payload = {
+        dataset_type: dataset,
+        search_by: searchBy,
+        target: target,
+        algorithm: algorithm,
+        match_mode: 'contains'
+    };
+    
+    if (dataset === 'custom') {
+        const rawCustom = document.getElementById('custom-data-input').value;
+        payload.custom_data = rawCustom.split(',').map(s => {
+            const num = parseFloat(s.trim());
+            return isNaN(num) ? s.trim() : num;
+        });
+    }
+    
+    fetch('/api/search/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        renderSearchResults(data, algorithm);
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error executing search: ' + err);
+    });
+}
+
+function renderSearchResults(data, mode) {
+    const resultsSec = document.getElementById('search-results-section');
+    const banner = document.getElementById('comparison-banner');
+    const linearCard = document.getElementById('linear-result-card');
+    const binaryCard = document.getElementById('binary-result-card');
+    resultsSec.style.display = 'block';
+
+    if (mode === 'compare') {
+        linearCard.style.display = 'block';
+        binaryCard.style.display = 'block';
+        const linear = data.linear_search;
+        const binary = data.binary_search;
+        const summary = data.comparison_summary;
+        
+        banner.innerHTML = `
+            <div>
+                ⚡ <strong>Inspection Comparison:</strong> Express ID Lookup checked only <strong>${summary.binary_comparisons} record(s)</strong> vs. Flexible Search's <strong>${summary.linear_comparisons} record(s)</strong>.
+                <br><span style="font-size:0.9em; opacity:0.95;">Direct interval check cut search effort by ${summary.efficiency_gain.replace('fewer comparisons with Binary Search', 'fewer checks')}!</span>
+            </div>
+            <div>
+                File Status: <strong>${binary.found ? '✅ Record Located' : '❌ File Not Found'}</strong>
+            </div>
+        `;
+        renderSingleResult('linear', linear);
+        renderSingleResult('binary', binary);
+    } else if (mode === 'linear') {
+        linearCard.style.display = 'block';
+        binaryCard.style.display = 'none';
+        banner.innerHTML = `
+            <div>🔍 Flexible Record Search completed in <strong>${data.comparisons} inspection check(s)</strong> (${data.execution_time_ms} ms).</div>
+            <div>File Status: <strong>${data.found ? '✅ Record Located at Position #' + (data.index + 1) : '❌ File Not Found'}</strong></div>
+        `;
+        renderSingleResult('linear', data);
+    } else {
+        linearCard.style.display = 'none';
+        binaryCard.style.display = 'block';
+        banner.innerHTML = `
+            <div>⚡ Express ID Lookup located file in only <strong>${data.comparisons} interval check(s)</strong> (${data.execution_time_ms} ms).</div>
+            <div>File Status: <strong>${data.found ? '✅ Record Located at Position #' + (data.index + 1) : '❌ File Not Found'}</strong></div>
+        `;
+        renderSingleResult('binary', data);
+    }
+}
+
+function renderSingleResult(type, res) {
+    const statsDiv = document.getElementById(`${type}-stats`);
+    const traceDiv = document.getElementById(`${type}-trace`);
+    
+    let itemDetails = 'None';
+    if (res.item) {
+        if (typeof res.item === 'object') {
+            itemDetails = res.item.doctor_name || res.item.patient_name || (`#${res.item.appointment_id}`) || JSON.stringify(res.item);
+        } else {
+            itemDetails = String(res.item);
+        }
+    }
+    
+    const practicalVerdict = type === 'linear' 
+        ? 'Sequential scan across registered profiles. Best suited for keyword queries and partial names.'
+        : 'Interval bisection. Cut the lookup space in half at each step for instant retrieval!';
+
+    statsDiv.innerHTML = `
+        <p><strong>Result:</strong> ${res.found ? '✅ Found' : '❌ Not on Record'} (Matched: <em>${itemDetails}</em>)</p>
+        <p><strong>Total Checks:</strong> ${res.comparisons} of ${res.total_elements} records examined</p>
+        <p><strong>Response Time:</strong> ${res.execution_time_ms} ms</p>
+        <p><strong>Practical Verdict:</strong> ${practicalVerdict}</p>
+    `;
+    
+    traceDiv.innerHTML = '';
+    res.trace.forEach(step => {
+        const stepEl = document.createElement('div');
+        stepEl.className = 'trace-step' + (step.matched || step.found ? ' match' : '');
+        if (type === 'linear') {
+            stepEl.innerHTML = `
+                <div class="trace-meta">Check #${step.step} · Registry Slot ${step.index + 1}</div>
+                <div>Examining: <strong>${step.current_value}</strong></div>
+                <div style="color: #64748b;">${step.comparison.replace('MATCH', 'MATCH FOUND').replace('NO MATCH', 'Does not match search term')}</div>
+            `;
+        } else {
+            stepEl.innerHTML = `
+                <div class="trace-meta">Bisection Check #${step.step} · Current Range: [Slot ${step.low + 1} to ${step.high + 1}] · Midpoint: Slot ${step.mid !== null ? (step.mid + 1) : 'N/A'}</div>
+                <div>Examining Midpoint Record: <strong>${step.mid_value !== null ? step.mid_value : 'N/A'}</strong></div>
+                <div style="color: #64748b;">${step.action.replace('arr[', 'Registry slot ').replace(']', '')}</div>
+            `;
+        }
+        traceDiv.appendChild(stepEl);
+    });
+}
+
+function resetSearch() {
+    document.getElementById('target-input').value = '101';
+    document.getElementById('search-results-section').style.display = 'none';
+}
+
+function runBenchmark() {
+    const size = document.getElementById('bench-size').value;
+    const pos = document.getElementById('bench-pos').value;
+    const benchDiv = document.getElementById('benchmark-results');
+    
+    fetch('/api/benchmark/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ size: size, target_position: pos })
+    })
+    .then(r => r.json())
+    .then(data => {
+        benchDiv.style.display = 'block';
+        const res = data.results;
+        const lin = res.linear_search;
+        const bin = res.binary_search;
+        
+        benchDiv.innerHTML = `
+            <table class="benchmark-table">
+                <thead>
+                    <tr>
+                        <th>Hospital Retrieval Tool</th>
+                        <th>Active Registry Volume</th>
+                        <th>Target File</th>
+                        <th>Checks Performed</th>
+                        <th>Terminal Response Time</th>
+                        <th>Practical Outcome</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #fffbeb;">
+                        <td><strong>🔍 Flexible Record Search</strong></td>
+                        <td>${data.dataset_size} active records</td>
+                        <td>ID #${data.target}</td>
+                        <td><strong>${lin.comparisons} checks</strong></td>
+                        <td>${lin.execution_time_ms} ms</td>
+                        <td>Scanned ${Math.round((lin.comparisons/data.dataset_size)*100)}% of the patient database</td>
+                    </tr>
+                    <tr style="background: #eff6ff;">
+                        <td><strong>⚡ Express ID Direct Lookup</strong></td>
+                        <td>${data.dataset_size} active records</td>
+                        <td>ID #${data.target}</td>
+                        <td><strong>${bin.comparisons} checks only</strong></td>
+                        <td>${bin.execution_time_ms} ms</td>
+                        <td>Located in just ${bin.comparisons} interval splits!</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 15px; padding: 14px; background: #f0fdf4; border-radius: 8px; color: #166534; font-weight: 600;">
+                💡 Practical Takeaway for Reception Terminals: Across ${data.dataset_size} hospital records, Express ID Lookup pulled up the patient in just ${bin.comparisons} checks, whereas Flexible Search had to inspect ${lin.comparisons} records one by one!
+            </div>
+        `;
+    });
+}
+</script>
+{% endblock %}

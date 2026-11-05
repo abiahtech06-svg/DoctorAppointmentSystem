@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Clinical Directory & Navigation Network{% endblock %}
+
+{% block content %}
+<div class="phase2-container">
+    <div class="phase2-header">
+        <h1>🏥 CLINICAL DIRECTORY, STAFF INDEX & INDOOR ROUTE NETWORK</h1>
+        <p>Enterprise Hospital Division Directory, Fast Doctor Staff Indexing, and Turn-by-Turn Indoor Corridor Pathfinding</p>
+    </div>
+
+    <!-- Overview Section -->
+    <section class="overview">
+        <h2>Hospital Infrastructure & Operational Workflows</h2>
+        <div class="overview-content">
+            <p>Modern hospital operations rely on integrated operational systems: organizing clinical services hierarchically by division, indexing attending physicians for instantaneous lookup, and calculating optimal indoor walking routes for patients moving between reception, clinics, and pharmacies.</p>
+            
+            <div class="key-concepts">
+                <div class="concept-card">
+                    <h3>🏥 Hospital Clinical Tree</h3>
+                    <p>Organizes healthcare facilities hierarchically into Clinical Services (Cardiology, Neurology) vs. Surgical Services (General Surgery, Orthopedics) across hospital wings and floors.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🔄 Departmental Traversals</h3>
+                    <p>Systematically inspects hospital units for administrative reporting, floor-by-floor management, and emergency evacuation workflows.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>⚡ Instant Doctor Staff Index</h3>
+                    <p>High-efficiency binary search index enabling reception desks to look up attending doctors instantly by Staff ID and display rosters in natural order.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🗺️ Corridor Navigation Network</h3>
+                    <p>Hospital hallway graph connecting the main reception desk to specialized consultation rooms, diagnostic labs, billing, and the pharmacy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Structures Demonstrations -->
+    <section class="demonstrations">
+        <h2>🎯 Interactive Clinical Systems</h2>
+        <p>Explore any hospital operational module below to inspect organizational hierarchies, test staff search, or compute turn-by-turn routes.</p>
+        
+        <div class="demo-grid">
+            <!-- Binary Tree Demo -->
+            <div class="demo-card">
+                <div class="demo-icon">🏥</div>
+                <h3>Hospital Department Directory</h3>
+                <p><strong>System:</strong> Clinical & Surgical Divisions Hierarchy</p>
+                <p><strong>Inspections:</strong> Inorder, Preorder, Postorder Workflows</p>
+                <div class="demo-description">
+                    <p>✓ Complete division and department mapping</p>
+                    <p>✓ East & West Hospital wing assignments</p>
+                    <p>✓ Multi-level floor organization</p>
+                    <p>✓ Step-by-step organizational review</p>
+                </div>
+                <a href="{{ url_for('tree_demo') }}" class="btn btn-primary">Explore Department Directory →</a>
+            </div>
+
+            <!-- BST Demo -->
+            <div class="demo-card">
+                <div class="demo-icon">⚡</div>
+                <h3>Staff Doctor Index & Fast Search</h3>
+                <p><strong>System:</strong> On-Duty Medical Staff Directory</p>
+                <p><strong>Performance:</strong> Instantaneous Logarithmic Doctor Lookup</p>
+                <div class="demo-description">
+                    <p>✓ Instant Doctor Search by Staff ID</p>
+                    <p>✓ Step-by-step search comparison path</p>
+                    <p>✓ Register & index new medical staff dynamically</p>
+                    <p>✓ Auto-sorted doctor registry</p>
+                </div>
+                <a href="{{ url_for('bst_demo') }}" class="btn btn-primary">Search Staff Directory →</a>
+            </div>
+
+            <!-- Graph Demo -->
+            <div class="demo-card">
+                <div class="demo-icon">🗺️</div>
+                <h3>Indoor Corridor Map & Route Finder</h3>
+                <p><strong>System:</strong> Hospital Corridor Navigation Network</p>
+                <p><strong>Routing:</strong> Optimal Shortest Path & Exploration</p>
+                <div class="demo-description">
+                    <p>✓ Connected wards, clinics, labs & pharmacies</p>
+                    <p>✓ Adjacency Network of hospital corridors</p>
+                    <p>✓ Optimal turn-by-turn pathfinding for patients</p>
+                    <p>✓ Department-to-pharmacy post-visit guidance</p>
+                </div>
+                <a href="{{ url_for('graph_demo') }}" class="btn btn-primary">Open Hospital Map →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hospital Systems Synergy -->
+    <section class="learning">
+        <h2>🔗 Seamless Hospital Workflow Integration</h2>
+        <div class="learning-grid">
+            <div class="learning-card">
+                <h3>Patient Queue → Indoor Navigation</h3>
+                <p>When a patient reaches the front of the triage queue, the navigation engine calculates the direct corridor route to their assigned consultation room.</p>
+            </div>
+            <div class="learning-card">
+                <h3>Recent Activity → Audit Trail</h3>
+                <p>Booking and cancellation actions automatically feed the hospital audit stack, keeping reception records up-to-date in real time.</p>
+            </div>
+            <div class="learning-card">
+                <h3>Doctor Registry → Department Wings</h3>
+                <p>Every doctor record links directly into their respective clinical department, building wing, and floor level in the hospital directory.</p>
+            </div>
+            <div class="learning-card">
+                <h3>Instant Lookup vs. Roster Scanning</h3>
+                <p>Receptionists look up medical staff in milliseconds by Staff ID without having to scan linearly through entire staff rosters.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.phase2-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.phase2-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 35px 20px;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(17, 153, 142, 0.25);
+}
+
+.phase2-header h1 {
+    font-size: 1.9em;
+    margin-bottom: 10px;
+}
+
+.phase2-header p {
+    font-size: 1.1em;
+    opacity: 0.95;
+}
+
+.overview {
+    margin-bottom: 50px;
+    padding: 35px;
+    background-color: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.overview h2 {
+    color: #1e293b;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.overview-content > p {
+    color: #475569;
+    margin-bottom: 25px;
+    line-height: 1.6;
+    font-size: 1.05em;
+}
+
+.key-concepts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.concept-card {
+    background: white;
+    padding: 22px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-top: 4px solid #11998e;
+}
+
+.concept-card h3 {
+    color: #0f766e;
+    margin-bottom: 10px;
+    font-size: 1.15em;
+}
+
+.concept-card p {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.95em;
+}
+
+.demonstrations {
+    margin-bottom: 50px;
+}
+
+.demonstrations h2 {
+    text-align: center;
+    color: #1e293b;
+    margin-bottom: 10px;
+    font-size: 1.6em;
+}
+
+.demonstrations > p {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 35px;
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.demo-card {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.demo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(17, 153, 142, 0.15);
+}
+
+.demo-icon {
+    font-size: 2.8em;
+    margin-bottom: 15px;
+}
+
+.demo-card h3 {
+    color: #1e293b;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.demo-card p {
+    color: #64748b;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+}
+
+.demo-description {
+    background-color: #f1f5f9;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 18px 0;
+}
+
+.demo-description p {
+    margin: 6px 0;
+    font-size: 0.9em;
+    color: #334155;
+}
+
+.demo-card .btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    text-align: center;
+}
+
+.learning {
+    padding: 35px;
+    background: linear-gradient(135deg, rgba(17, 153, 142, 0.06), rgba(56, 239, 125, 0.06));
+    border-radius: 10px;
+    border: 1px solid rgba(17, 153, 142, 0.2);
+    margin-bottom: 40px;
+}
+
+.learning h2 {
+    color: #0f766e;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.learning-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.learning-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.learning-card h3 {
+    color: #11998e;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.learning-card p {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.95em;
+}
+
+@media (max-width: 768px) {
+    .demo-grid, .learning-grid, .key-concepts {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

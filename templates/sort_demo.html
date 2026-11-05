@@ -1,0 +1,612 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Roster & Schedule Organizer Workbench{% endblock %}
+
+{% block content %}
+<div class="sort-workbench-container">
+    <div class="page-header">
+        <div>
+            <h1>📊 Hospital Roster & Consultation Schedule Organizer</h1>
+            <p class="subtitle">Practical Clinical Operations: Priority Scheduling, Division Roster Sorting & Walk-In Intake Ordering</p>
+        </div>
+        <div>
+            <a href="{{ url_for('phase3') }}" class="btn btn-secondary">← Back to Search & Sorter Hub</a>
+        </div>
+    </div>
+
+    <!-- Sorting Execution Panel -->
+    <div class="control-card">
+        <h2>🛠️ Hospital Sorting Execution Panel</h2>
+        <div class="controls-grid">
+            <div class="control-group">
+                <label for="dataset-select"><strong>1. Select Hospital Records:</strong></label>
+                <select id="dataset-select" class="form-control" onchange="handleDatasetChange()">
+                    <option value="doctors">👨‍⚕️ Doctors Roster ({{ doctors|length }} specialists)</option>
+                    <option value="patients">👥 Patients Intake ({{ patients|length }} active files)</option>
+                    <option value="appointments">📅 Appointments ({{ appointments|length }} bookings)</option>
+                    <option value="custom">🔢 Custom Priority Codes</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="sort-by-group">
+                <label for="sort-by-select"><strong>2. Sort By Field:</strong></label>
+                <select id="sort-by-select" class="form-control">
+                    <option value="id">Staff ID (Numeric)</option>
+                    <option value="name">Doctor Name (Alphabetical)</option>
+                    <option value="specialization">Medical Specialty</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="order-select"><strong>3. Sequence Direction:</strong></label>
+                <select id="order-select" class="form-control">
+                    <option value="asc">Ascending (A → Z, Earliest First)</option>
+                    <option value="desc">Descending (Z → A, Latest First)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="algorithm-select"><strong>4. Sorting Method:</strong></label>
+                <select id="algorithm-select" class="form-control">
+                    <option value="compare">⚡ Compare All 3 Sorters (Priority, Fast Roster, Walk-In)</option>
+                    <option value="merge">📅 Schedule Priority Organizer (Guaranteed Fair Order)</option>
+                    <option value="quick">🚀 Fast Division Roster Sorter (High-Speed In-Place)</option>
+                    <option value="insertion">🚶 Walk-In Arrival Desk Sorter (Incremental Additions)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="custom-data-container" style="display: none; margin-top: 15px;">
+            <label for="custom-data-input"><strong>Custom Priority / Badge Numbers (Comma-Separated):</strong></label>
+            <input type="text" id="custom-data-input" class="form-control" value="85, 24, 63, 45, 17, 31, 96, 50, 45, 12, 70">
+        </div>
+
+        <div class="actions-bar" style="margin-top: 20px; display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="executeSort()">▶ Organize Records</button>
+            <button class="btn btn-secondary" onclick="resetSort()">Reset</button>
+        </div>
+    </div>
+
+    <!-- Comparative Results Cards -->
+    <div id="comparison-results-section" style="display: none;">
+        <h2 style="color: #1e293b; margin-bottom: 18px;">⚡ Multi-Sorter Performance Comparison</h2>
+        <div class="comparison-cards-grid" id="comparison-cards-grid">
+            <!-- Populated via JavaScript -->
+        </div>
+
+        <!-- Sorted Data Table Display -->
+        <div class="sorted-table-card" style="margin-top: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #1e293b;">📋 Organized Hospital Records</h3>
+                <span id="sorted-count-badge" class="badge o1"></span>
+            </div>
+            <div class="table-responsive" id="sorted-table-container"></div>
+        </div>
+    </div>
+
+    <!-- Single Algorithm Execution View -->
+    <div id="single-result-section" style="display: none;">
+        <div class="single-algorithm-card">
+            <div class="single-header" id="single-header"></div>
+            <div class="single-body">
+                <div class="metrics-row" id="single-metrics-row"></div>
+                <h4>Step-by-Step Organization Log</h4>
+                <div class="trace-container" id="single-trace-container"></div>
+                <div style="margin-top: 25px;">
+                    <h4>Organized Records Table</h4>
+                    <div class="table-responsive" id="single-table-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hospital Workflow Stress Test Sandbox -->
+    <div class="benchmark-card">
+        <h2>🔬 Hospital Operational Rush Simulator (Workflow Stress Test)</h2>
+        <p>Test how each sorting tool performs during typical daily hospital scenarios: random walk-ins, pre-scheduled appointment sheets, or emergency triage changes.</p>
+        
+        <div class="benchmark-controls">
+            <div class="control-group">
+                <label for="dist-select"><strong>Clinical Intake Scenario:</strong></label>
+                <select id="dist-select" class="form-control">
+                    <option value="random">🎲 Morning Unsorted Walk-Ins (Random arrival times)</option>
+                    <option value="sorted">✅ Pre-Scheduled Daily Appointments (Already in morning order)</option>
+                    <option value="reversed">🔄 Emergency Priority Triage (Reverse call-up)</option>
+                    <option value="nearly_sorted">🤏 Small Schedule Adjustments (Nearly organized with 2-3 late walk-ins)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="dist-size"><strong>Active Patient Volume:</strong></label>
+                <select id="dist-size" class="form-control">
+                    <option value="50">50 Patients (Small Clinic)</option>
+                    <option value="150" selected>150 Patients (Daily Wing Intake)</option>
+                    <option value="500">500 Patients (District Outpatient)</option>
+                    <option value="1000">1,000 Patients (Regional Hospital)</option>
+                </select>
+            </div>
+
+            <div class="control-group" style="align-self: flex-end;">
+                <button class="btn btn-warning-action" onclick="runDistributionBenchmark()">⚡ Run Scenario Test</button>
+            </div>
+        </div>
+
+        <div id="distribution-results" style="margin-top: 25px; display: none;"></div>
+    </div>
+</div>
+
+<style>
+.sort-workbench-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    color: #1e293b;
+    margin: 0 0 6px 0;
+    font-size: 1.7em;
+}
+
+.subtitle {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.95em;
+}
+
+.control-card, .benchmark-card, .sorted-table-card, .single-algorithm-card {
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+.control-card h2, .benchmark-card h2 {
+    color: #1e293b;
+    margin-bottom: 18px;
+    font-size: 1.3em;
+}
+
+.controls-grid, .benchmark-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.control-group label {
+    font-size: 0.9em;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95em;
+    background: white;
+    color: #1e293b;
+}
+
+.comparison-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.alg-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.alg-card-header {
+    padding: 16px 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.merge-header { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.quick-header { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+.insertion-header { background: linear-gradient(135deg, #10b981, #059669); }
+
+.alg-card-body {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.92em;
+}
+
+.metric-label { color: #64748b; }
+.metric-val { font-weight: 700; color: #1e293b; }
+
+.trace-container {
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.trace-step {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.88em;
+}
+
+.trace-step:nth-child(even) { background: #fbfcfe; }
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.data-table th, .data-table td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+}
+
+.badge {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.82em;
+}
+
+.badge.o1 { background: #dcfce7; color: #15803d; }
+
+.btn-warning-action {
+    background: #f59e0b;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-warning-action:hover {
+    background: #d97706;
+}
+</style>
+
+<script>
+let lastSortedRecords = [];
+
+function handleDatasetChange() {
+    const ds = document.getElementById('dataset-select').value;
+    const sortBySelect = document.getElementById('sort-by-select');
+    const customDataContainer = document.getElementById('custom-data-container');
+    
+    if (ds === 'custom') {
+        customDataContainer.style.display = 'block';
+        document.getElementById('sort-by-group').style.display = 'none';
+    } else {
+        customDataContainer.style.display = 'none';
+        document.getElementById('sort-by-group').style.display = 'flex';
+        sortBySelect.innerHTML = '';
+        if (ds === 'doctors') {
+            sortBySelect.innerHTML = `
+                <option value="id">Staff ID (Numeric)</option>
+                <option value="name">Doctor Name (Alphabetical)</option>
+                <option value="specialization">Medical Specialty</option>
+            `;
+        } else if (ds === 'patients') {
+            sortBySelect.innerHTML = `
+                <option value="id">Patient File ID (Numeric)</option>
+                <option value="name">Patient Name (Alphabetical)</option>
+                <option value="age">Patient Age (Numeric)</option>
+            `;
+        } else if (ds === 'appointments') {
+            sortBySelect.innerHTML = `
+                <option value="id">Appointment ID (Numeric)</option>
+                <option value="date">Date & Time</option>
+                <option value="patient">Patient Name</option>
+                <option value="doctor">Doctor Name</option>
+                <option value="status">Status</option>
+            `;
+        }
+    }
+}
+
+function executeSort() {
+    const dataset = document.getElementById('dataset-select').value;
+    const sortBy = document.getElementById('sort-by-select').value;
+    const order = document.getElementById('order-select').value;
+    const algorithm = document.getElementById('algorithm-select').value;
+    
+    let payload = {
+        dataset_type: dataset,
+        sort_by: sortBy,
+        reverse: order === 'desc',
+        algorithm: algorithm
+    };
+    
+    if (dataset === 'custom') {
+        const rawCustom = document.getElementById('custom-data-input').value;
+        payload.custom_data = rawCustom.split(',').map(s => {
+            const num = parseFloat(s.trim());
+            return isNaN(num) ? s.trim() : num;
+        });
+    }
+    
+    fetch('/api/sort/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (algorithm === 'compare') {
+            renderComparisonResults(data, dataset);
+        } else {
+            renderSingleResult(data, dataset);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error executing sort: ' + err);
+    });
+}
+
+function renderComparisonResults(data, dataset) {
+    document.getElementById('single-result-section').style.display = 'none';
+    const compSec = document.getElementById('comparison-results-section');
+    compSec.style.display = 'block';
+    
+    const grid = document.getElementById('comparison-cards-grid');
+    grid.innerHTML = '';
+    
+    const algs = data.algorithms;
+    const friendlyNames = {
+        'merge_sort': { title: '📅 Schedule Priority Organizer', badge: 'Guaranteed Fair Order', header: 'merge-header', use: 'Appointment calendars: keeps fair arrival order for patients sharing time slots' },
+        'quick_sort': { title: '🚀 Fast Division Roster Sorter', badge: 'High-Speed In-Place', header: 'quick-header', use: 'Staff rosters: instantly alphabetizes large physician lists across wings' },
+        'insertion_sort': { title: '🚶 Walk-In Arrival Desk Sorter', badge: 'Adaptive Incremental', header: 'insertion-header', use: 'Arriving walk-in queue: inserts new arrivals into morning line with 0 re-sorting' }
+    };
+    
+    for (const [key, info] of Object.entries(algs)) {
+        const meta = friendlyNames[key] || { title: info.name, badge: 'Standard', header: 'merge-header', use: '' };
+        const card = document.createElement('div');
+        card.className = 'alg-card';
+        card.innerHTML = `
+            <div class="alg-card-header ${meta.header}">
+                <h3 style="margin: 0; font-size: 1.1em;">${meta.title}</h3>
+                <span class="badge o1">${meta.badge}</span>
+            </div>
+            <div class="alg-card-body">
+                <div>
+                    <div class="metric-item">
+                        <span class="metric-label">Execution Speed</span>
+                        <span class="metric-val" style="color: #2563eb;">${info.execution_time_ms} ms</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Record Checks</span>
+                        <span class="metric-val">${info.comparisons}</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Record Movements</span>
+                        <span class="metric-val">${info.operations}</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Preserves Arrival Order?</span>
+                        <span class="metric-val">${info.stable ? '✅ Yes (Fair Queue)' : '❌ No (Displacing)'}</span>
+                    </div>
+                    <div class="metric-item" style="border-bottom: none; flex-direction: column; gap: 4px;">
+                        <span class="metric-label">Clinical Workflow Advantage:</span>
+                        <span style="font-size:0.88em; color: #334155;">${meta.use}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    }
+    
+    // Now fetch one sorted list for table rendering
+    fetch('/api/sort/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            dataset_type: dataset,
+            sort_by: document.getElementById('sort-by-select').value,
+            reverse: document.getElementById('order-select').value === 'desc',
+            algorithm: 'merge',
+            custom_data: dataset === 'custom' ? document.getElementById('custom-data-input').value.split(',').map(s => parseFloat(s.trim()) || s.trim()) : []
+        })
+    })
+    .then(r => r.json())
+    .then(sortedData => {
+        renderTable(sortedData.sorted_list, dataset, 'sorted-table-container', 'sorted-count-badge');
+    });
+}
+
+function renderSingleResult(data, dataset) {
+    document.getElementById('comparison-results-section').style.display = 'none';
+    const singleSec = document.getElementById('single-result-section');
+    singleSec.style.display = 'block';
+    
+    const header = document.getElementById('single-header');
+    header.innerHTML = `
+        <h2 style="margin: 0; color: #1e293b;">${data.algorithm} Execution Results</h2>
+        <span class="badge o1">${data.stable ? 'Fair Non-Displacing Order' : 'Fast In-Place Order'}</span>
+    `;
+    
+    const metricsRow = document.getElementById('single-metrics-row');
+    metricsRow.innerHTML = `
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; background: #f8fafc; padding: 16px; border-radius: 8px;">
+            <div><strong>Total Records:</strong> ${data.total_elements}</div>
+            <div><strong>Profile Checks:</strong> ${data.comparisons}</div>
+            <div><strong>Record Movements:</strong> ${data.operations}</div>
+            <div><strong>Execution Speed:</strong> ${data.execution_time_ms} ms</div>
+        </div>
+    `;
+    
+    const traceContainer = document.getElementById('single-trace-container');
+    traceContainer.innerHTML = '';
+    data.trace.forEach(step => {
+        const el = document.createElement('div');
+        el.className = 'trace-step';
+        el.innerHTML = `<div><strong>${step.description || 'Step'}</strong></div>`;
+        traceContainer.appendChild(el);
+    });
+    
+    renderTable(data.sorted_list, dataset, 'single-table-container');
+}
+
+function renderTable(list, dataset, containerId, badgeId) {
+    const cont = document.getElementById(containerId);
+    if (badgeId) {
+        document.getElementById(badgeId).innerText = `${list.length} records organized`;
+    }
+    
+    if (dataset === 'custom') {
+        cont.innerHTML = `<div style="padding: 15px; font-family: monospace; font-size: 1.1em; background: #f1f5f9; border-radius: 8px;">[ ${list.join(', ')} ]</div>`;
+        return;
+    }
+    
+    if (dataset === 'doctors') {
+        cont.innerHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr><th>Staff ID</th><th>Specialist Name</th><th>Specialization</th><th>Phone</th><th>Email</th></tr>
+                </thead>
+                <tbody>
+                    ${list.map(d => `<tr><td><strong>#${d.doctor_id}</strong></td><td>${d.doctor_name}</td><td>${d.specialization}</td><td>${d.phone}</td><td>${d.email}</td></tr>`).join('')}
+                </tbody>
+            </table>
+        `;
+    } else if (dataset === 'patients') {
+        cont.innerHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr><th>Patient ID</th><th>Patient Name</th><th>Age</th><th>Gender</th><th>Phone</th></tr>
+                </thead>
+                <tbody>
+                    ${list.map(p => `<tr><td><strong>#${p.patient_id}</strong></td><td>${p.patient_name}</td><td>${p.age}</td><td>${p.gender}</td><td>${p.phone}</td></tr>`).join('')}
+                </tbody>
+            </table>
+        `;
+    } else {
+        cont.innerHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr><th>Appt ID</th><th>Consultation Date & Time</th><th>Patient</th><th>Doctor</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    ${list.map(a => `<tr><td><strong>#${a.appointment_id}</strong></td><td>${a.appointment_date} ${a.appointment_time}</td><td>${a.patient_name}</td><td>${a.doctor_name}</td><td>${a.status}</td></tr>`).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+}
+
+function resetSort() {
+    document.getElementById('comparison-results-section').style.display = 'none';
+    document.getElementById('single-result-section').style.display = 'none';
+}
+
+function runDistributionBenchmark() {
+    const dist = document.getElementById('dist-select').value;
+    const size = document.getElementById('dist-size').value;
+    const resDiv = document.getElementById('distribution-results');
+    
+    fetch('/api/benchmark/sort', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ size: size, distribution: dist })
+    })
+    .then(r => r.json())
+    .then(data => {
+        resDiv.style.display = 'block';
+        const algs = data.comparison.algorithms;
+        const m = algs.merge_sort;
+        const q = algs.quick_sort;
+        const ins = algs.insertion_sort;
+        
+        resDiv.innerHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Hospital Sorting Tool</th>
+                        <th>Workflow Scenario (N = ${data.dataset_size})</th>
+                        <th>Profile Checks</th>
+                        <th>Record Movements</th>
+                        <th>Response Time</th>
+                        <th>Practical Clinical Advantage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #eef2ff;">
+                        <td><strong>📅 Schedule Priority Organizer</strong></td>
+                        <td>${dist.replace('_', ' ')}</td>
+                        <td><strong>${m.comparisons} checks</strong></td>
+                        <td>${m.operations} merges</td>
+                        <td>${m.execution_time_ms} ms</td>
+                        <td>Guarantees fair non-displacing queue order across all rush types</td>
+                    </tr>
+                    <tr style="background: #f0f9ff;">
+                        <td><strong>🚀 Fast Division Roster Sorter</strong></td>
+                        <td>${dist.replace('_', ' ')}</td>
+                        <td><strong>${q.comparisons} checks</strong></td>
+                        <td>${q.operations} swaps</td>
+                        <td>${q.execution_time_ms} ms</td>
+                        <td>Minimal memory footprint when re-indexing entire hospital wings</td>
+                    </tr>
+                    <tr style="background: ${data.distribution === 'sorted' ? '#f0fdf4' : (data.distribution === 'reversed' ? '#fef2f2' : '#ffffff')};">
+                        <td><strong>🚶 Walk-In Arrival Desk Sorter</strong></td>
+                        <td>${dist.replace('_', ' ')}</td>
+                        <td><strong>${ins.comparisons} checks</strong></td>
+                        <td>${ins.operations} shifts</td>
+                        <td>${ins.execution_time_ms} ms</td>
+                        <td>${data.distribution === 'sorted' ? '⚡ ZERO unnecessary movements on pre-scheduled sheets!' : (data.distribution === 'reversed' ? '⚠️ High adjustments needed on reversed orders' : 'Optimal for inserting new arrivals into morning clinic lines')}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 15px; padding: 14px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.95em; color: #334155;">
+                ${data.distribution === 'sorted' ? '💡 <strong>Practical Observation:</strong> When consultation sheets are already pre-organized, the Walk-In Sorter requires zero shifts, making it the most efficient choice for morning arrival desks.' : '💡 <strong>Practical Observation:</strong> The Schedule Priority Organizer provides rock-solid consistency and ensures patient booking sequences are never disrupted.'}
+            </div>
+        `;
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,696 @@
+{% extends "base.html" %}
+
+{% block title %}Appointments - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>📅 Appointments</h1>
+        <a href="{{ url_for('add_appointment') }}" class="btn btn-primary">+ Book Appointment</a>
+    </div>
+
+    <!-- Hospital Sorting & Searching Operations Panel -->
+    <div class="appointment-filter-bar" style="background: white; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+        <form method="GET" action="{{ url_for('appointments_list') }}" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+            <!-- Search Inputs -->
+            <div style="flex: 2; min-width: 240px;">
+                <label style="font-size: 0.85em; font-weight: 700; color: #475569; display: block; margin-bottom: 5px;">🔍 Search Appointments:</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" name="search_query" value="{{ search_query or '' }}" placeholder="Search ID, Patient, or Date..." class="form-control" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <select name="search_alg" class="form-control" style="width: 170px; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <option value="linear" {% if search_alg == 'linear' %}selected{% endif %}>Flexible Search (Text/Name)</option>
+                        <option value="binary" {% if search_alg == 'binary' %}selected{% endif %}>Express Search (Appt ID)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Sort Inputs -->
+            <div style="flex: 2; min-width: 240px;">
+                <label style="font-size: 0.85em; font-weight: 700; color: #475569; display: block; margin-bottom: 5px;">📊 Organize Consultation Schedule:</label>
+                <div style="display: flex; gap: 8px;">
+                    <select name="sort_by" class="form-control" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Chronological Date & Time</option>
+                        <option value="id" {% if sort_by == 'id' %}selected{% endif %}>Appointment ID</option>
+                        <option value="patient" {% if sort_by == 'patient' %}selected{% endif %}>Patient Name</option>
+                        <option value="doctor" {% if sort_by == 'doctor' %}selected{% endif %}>Doctor Name</option>
+                        <option value="status" {% if sort_by == 'status' %}selected{% endif %}>Status</option>
+                    </select>
+                    <select name="algorithm" class="form-control" style="width: 170px; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <option value="merge" {% if sort_alg == 'merge' %}selected{% endif %}>Priority Order (Fair)</option>
+                        <option value="quick" {% if sort_alg == 'quick' %}selected{% endif %}>Fast Sorter</option>
+                        <option value="insertion" {% if sort_alg == 'insertion' %}selected{% endif %}>Walk-In Arrival Order</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-primary" style="padding: 8px 16px;">Apply Filter</button>
+                <a href="{{ url_for('appointments_list') }}" class="btn btn-secondary" style="padding: 8px 14px; text-decoration: none; border-radius: 6px;">Reset</a>
+            </div>
+        </form>
+
+        <!-- Practical Feedback Badge -->
+        {% if search_metrics %}
+            <div style="margin-top: 14px; padding: 10px 14px; background: #eff6ff; border-radius: 6px; border-left: 4px solid #3b82f6; font-size: 0.9em; color: #1e40af;">
+                ⚡ <strong>Booking Lookup:</strong> 
+                {% if search_metrics.found %}
+                    Found appointment in <strong>{{ search_metrics.comparisons }} record check(s)</strong> ({{ search_metrics.execution_time_ms }} ms).
+                {% else %}
+                    Appointment not found after checking {{ search_metrics.comparisons }} records.
+                {% endif %}
+            </div>
+        {% elif sort_metrics %}
+            <div style="margin-top: 14px; padding: 10px 14px; background: #f0fdf4; border-radius: 6px; border-left: 4px solid #16a34a; font-size: 0.9em; color: #166534;">
+                📊 <strong>Schedule Organizer:</strong> Sequenced consultation calendar in {{ sort_metrics.execution_time_ms }} ms ({{ sort_metrics.comparisons }} appointment checks).
+            </div>
+        {% endif %}
+    </div>
+
+    {% if appointments %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Appointment ID</th>
+                        <th>Patient</th>
+                        <th>Doctor & Specialty</th>
+                        <th>Hospital Location</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                        <tr>
+                            <td><strong>#{{ appointment.appointment_id }}</strong></td>
+                            <td>{{ appointment.patient_name }}</td>
+                            <td>
+                                <strong>{{ appointment.doctor_name }}</strong><br>
+                                <small style="color: #666;">{{ appointment.specialization }}</small>
+                            </td>
+                            <td>
+                                <span style="font-weight: 600; color: #2b6cb0;">{{ appointment.department }}</span><br>
+                                <small style="color: #718096;">{{ appointment.wing }} ({{ appointment.division }})</small>
+                            </td>
+                            <td>
+                                {{ appointment.appointment_date }}<br>
+                                <small style="color: #666;">{{ appointment.appointment_time }}</small>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if appointment.status == 'Booked' %}status-booked{% elif appointment.status == 'Cancelled' %}status-cancelled{% else %}status-completed{% endif %}">
+                                    {{ appointment.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                    <button type="button" class="btn btn-outline btn-small" onclick="openRouteGuide({{ appointment.appointment_id }})" title="View patient corridor directions">
+                                        📍 Route Guide
+                                    </button>
+                                    {% if appointment.status == 'Booked' %}
+                                        <form method="POST" action="{{ url_for('complete_appointment', appointment_id=appointment.appointment_id) }}" style="display:inline;">
+                                            <button type="submit" class="btn btn-success btn-small" style="background: #10b981; color: white;" title="Mark consultation completed">✓ Complete</button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('cancel_appointment', appointment_id=appointment.appointment_id) }}" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Cancel this appointment?')">Cancel</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if session.get('role') == 'Admin' %}
+                                        <form method="POST" action="{{ url_for('delete_appointment', appointment_id=appointment.appointment_id) }}" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-small" style="opacity: 0.8;" onclick="return confirm('Permanently delete this appointment record?')">Delete</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No appointments booked yet.</p>
+            <a href="{{ url_for('add_appointment') }}" class="btn btn-primary">Book First Appointment</a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Hospital Patient Route Guide Modal -->
+<div id="routeModal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) closeRouteModal();">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 2em;">🏥</span>
+                <div>
+                    <h3 style="margin: 0; color: #1a365d; font-size: 1.25rem;">Patient Indoor Navigation Guide</h3>
+                    <p style="margin: 0; font-size: 0.85rem; color: #718096;">Turn-by-turn hospital corridor route & departmental directory</p>
+                </div>
+            </div>
+            <button type="button" class="modal-close" onclick="closeRouteModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body" id="routeModalBody">
+            <div style="text-align: center; padding: 40px; color: #718096;">
+                <div class="spinner" style="margin: 0 auto 15px;"></div>
+                Finding optimal corridor route...
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeRouteModal()">Close Navigation</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openRouteGuide(appointmentId) {
+    const modal = document.getElementById('routeModal');
+    const body = document.getElementById('routeModalBody');
+    modal.style.display = 'flex';
+    body.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #718096;">
+            <div style="display: inline-block; width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #3182ce; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;"></div>
+            <div>Calculating optimal corridor route...</div>
+        </div>
+    `;
+
+    fetch('/api/hospital/navigation-guide/' + appointmentId)
+        .then(response => {
+            if (!response.ok) throw new Error('Route guide could not be generated');
+            return response.json();
+        })
+        .then(data => {
+            renderRouteGuide(data);
+        })
+        .catch(err => {
+            body.innerHTML = `
+                <div style="padding: 20px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; color: #c53030; text-align: center;">
+                    <strong>Navigation Unavailable:</strong> ${err.message}
+                </div>
+            `;
+        });
+}
+
+function closeRouteModal() {
+    document.getElementById('routeModal').style.display = 'none';
+}
+
+function renderRouteGuide(data) {
+    const body = document.getElementById('routeModalBody');
+    const divInfo = data.division_info || {};
+    
+    const clinicSteps = (data.route_to_clinic && data.route_to_clinic.path) ? data.route_to_clinic.path : [];
+    const pharmacySteps = (data.route_to_pharmacy && data.route_to_pharmacy.path) ? data.route_to_pharmacy.path : [];
+    
+    let html = `
+        <div class="patient-card-header">
+            <div class="patient-meta-item">
+                <span class="meta-label">Patient</span>
+                <span class="meta-value">${data.patient_name}</span>
+            </div>
+            <div class="patient-meta-item">
+                <span class="meta-label">Attending Doctor</span>
+                <span class="meta-value">${data.doctor_name}</span>
+                <span class="badge-dept">${data.specialization}</span>
+            </div>
+            <div class="patient-meta-item">
+                <span class="meta-label">Hospital Location</span>
+                <span class="meta-value">${divInfo.wing || 'Main Wing'}, ${divInfo.floor || 'Floor 1'}</span>
+                <span class="badge-div">${divInfo.division || 'Clinical Services'}</span>
+            </div>
+        </div>
+
+        <div class="route-segment">
+            <div class="segment-title">
+                <span class="seg-icon">🚶</span>
+                <div>
+                    <strong>Check-in to Consultation Clinic (${data.department})</strong>
+                    <div style="font-size: 0.8rem; color: #718096;">Optimal turn-by-turn path from hospital entrance</div>
+                </div>
+            </div>
+            <div class="step-path-container">
+    `;
+
+    clinicSteps.forEach((step, idx) => {
+        const isStart = idx === 0;
+        const isEnd = idx === clinicSteps.length - 1;
+        const cardClass = isEnd ? 'step-bubble dest' : (isStart ? 'step-bubble start' : 'step-bubble');
+        const roleText = isStart ? 'Main Check-In' : (isEnd ? 'Consultation Room' : 'Corridor Crossing');
+        
+        html += `
+            <div class="${cardClass}">
+                <div class="step-badge">${idx + 1}</div>
+                <div class="step-text">
+                    <div class="step-name">${step}</div>
+                    <div class="step-desc">${roleText}</div>
+                </div>
+            </div>
+        `;
+        if (!isEnd) {
+            html += `<div class="path-arrow">➔</div>`;
+        }
+    });
+
+    html += `
+            </div>
+            <div class="route-stat-footer">
+                <span>📍 Steps: <strong>${data.route_to_clinic.distance || clinicSteps.length - 1} corridor segments</strong></span>
+                <span>📏 Approximate Walking Distance: <strong>${(data.route_to_clinic.distance || (clinicSteps.length - 1)) * 30} meters</strong></span>
+            </div>
+        </div>
+
+        <div class="route-segment" style="margin-top: 18px;">
+            <div class="segment-title">
+                <span class="seg-icon">💊</span>
+                <div>
+                    <strong>Post-Consultation: Clinic to Pharmacy Counter</strong>
+                    <div style="font-size: 0.8rem; color: #718096;">Direct route to collect prescriptions and settle medication</div>
+                </div>
+            </div>
+            <div class="step-path-container">
+    `;
+
+    pharmacySteps.forEach((step, idx) => {
+        const isStart = idx === 0;
+        const isEnd = idx === pharmacySteps.length - 1;
+        const cardClass = isEnd ? 'step-bubble pharmacy-dest' : (isStart ? 'step-bubble start' : 'step-bubble');
+        const roleText = isStart ? 'Consultation Exit' : (isEnd ? 'Medicine Pickup Counter' : 'Corridor Crossing');
+        
+        html += `
+            <div class="${cardClass}">
+                <div class="step-badge">${idx + 1}</div>
+                <div class="step-text">
+                    <div class="step-name">${step}</div>
+                    <div class="step-desc">${roleText}</div>
+                </div>
+            </div>
+        `;
+        if (!isEnd) {
+            html += `<div class="path-arrow">➔</div>`;
+        }
+    });
+
+    html += `
+            </div>
+            <div class="route-stat-footer">
+                <span>📍 Steps: <strong>${data.route_to_pharmacy.distance || pharmacySteps.length - 1} corridor segments</strong></span>
+                <span>📏 Approximate Walking Distance: <strong>${(data.route_to_pharmacy.distance || (pharmacySteps.length - 1)) * 30} meters</strong></span>
+            </div>
+        </div>
+    `;
+
+    body.innerHTML = html;
+}
+</script>
+
+<style>
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    color: #333;
+    margin: 0;
+}
+
+.table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background-color: #4facfe;
+    color: white;
+}
+
+.data-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.data-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.status-booked {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-completed {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85em;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .data-table {
+        font-size: 0.9em;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 10px;
+    }
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-box {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: modalSlideIn 0.25s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    color: #a0aec0;
+    cursor: pointer;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.modal-close:hover {
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.modal-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+/* Patient Header in Modal */
+.patient-card-header {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    background: linear-gradient(135deg, #ebf8ff 0%, #f0fdf4 100%);
+    border: 1px solid #bee3f8;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.patient-meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #718096;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.meta-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a202c;
+}
+
+.badge-dept {
+    display: inline-block;
+    margin-top: 4px;
+    background: #e2e8f0;
+    color: #2d3748;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+.badge-div {
+    display: inline-block;
+    margin-top: 4px;
+    background: #c6f6d5;
+    color: #22543d;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+/* Route Segments */
+.route-segment {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.segment-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.seg-icon {
+    font-size: 1.5rem;
+}
+
+.step-path-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+}
+
+.step-bubble {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f7fafc;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    min-width: 140px;
+}
+
+.step-bubble.start {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+.step-bubble.dest {
+    background: #f0fdf4;
+    border-color: #86efac;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.step-bubble.pharmacy-dest {
+    background: #fef3c7;
+    border-color: #fcd34d;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.step-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #4a5568;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.step-bubble.dest .step-badge {
+    background: #16a34a;
+}
+
+.step-bubble.pharmacy-dest .step-badge {
+    background: #d97706;
+}
+
+.step-bubble.start .step-badge {
+    background: #2563eb;
+}
+
+.step-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.step-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1a202c;
+}
+
+.step-desc {
+    font-size: 0.72rem;
+    color: #718096;
+}
+
+.path-arrow {
+    color: #a0aec0;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.route-stat-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2e8f0;
+    font-size: 0.8rem;
+    color: #4a5568;
+}
+
+.btn-outline {
+    background: #ffffff;
+    color: #2b6cb0;
+    border: 1px solid #bee3f8;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background: #ebf8ff;
+    border-color: #3182ce;
+    color: #2b6cb0;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical Registers - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="demo-container">
+    <div class="demo-header">
+        <h1>📋 Live Clinical Registers & Record Sequences</h1>
+        <p>Interactive records registry for Doctors, Patients, and Appointments with immediate insertion and deletion</p>
+    </div>
+
+    <!-- Doctors Clinical Register -->
+    <section class="data-structure-section">
+        <h2>👨‍⚕️ Medical Specialist Register</h2>
+        
+        <div class="structure-info">
+            <div class="info-box">
+                <h4>Status</h4>
+                <p><strong>Total Active Doctors:</strong> {{ doctors|length }}</p>
+            </div>
+            <div class="info-box">
+                <h4>Active Sequence</h4>
+                <p class="structure-display">{{ doctors_display }}</p>
+            </div>
+        </div>
+
+        <div class="operation-grid">
+            <div class="operation-box">
+                <h3>📋 Sequential Doctor Registry</h3>
+                <p>Browse active physician entries in sequential registry order:</p>
+                <div class="results-box">
+                    {% if doctors %}
+                        <ul class="linked-list-display">
+                            {% for doc in doctors %}
+                                <li>
+                                    <span class="node-id">Staff ID: {{ doc.doctor_id }}</span>
+                                    <span class="node-info">&rarr; {{ doc.doctor_name }} ({{ doc.specialization }})</span>
+                                </li>
+                            {% endfor %}
+                            <li class="node-end">&bull; End of Active Doctor List</li>
+                        </ul>
+                    {% else %}
+                        <p style="color: #999;">No doctors currently in the register</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="operation-box">
+                <h3>➕ Add New Doctor</h3>
+                <p>Register a doctor into the clinical records sequence</p>
+                <form action="{{ url_for('add_doctor') }}" method="GET">
+                    <button type="submit" class="btn btn-primary btn-full">+ Add New Doctor</button>
+                </form>
+
+                <h3 style="margin-top: 25px;">🗑️ Remove Doctor</h3>
+                <p>Remove a physician record from the active roster</p>
+                <div class="delete-form">
+                    <select id="delete-doctor-select" class="form-select">
+                        <option value="">Select a Doctor to delete...</option>
+                        {% for doc in doctors %}
+                            <option value="{{ doc.doctor_id }}">{{ doc.doctor_name }} (ID: {{ doc.doctor_id }})</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-danger" onclick="deleteLinkedListNode('doctors', 'delete-doctor-select')">Remove from Register</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Patients Clinical Register -->
+    <section class="data-structure-section">
+        <h2>👥 Patient Records Register</h2>
+        
+        <div class="structure-info">
+            <div class="info-box">
+                <h4>Status</h4>
+                <p><strong>Total Registered Patients:</strong> {{ patients|length }}</p>
+            </div>
+            <div class="info-box">
+                <h4>Active Sequence</h4>
+                <p class="structure-display">{{ patients_display }}</p>
+            </div>
+        </div>
+
+        <div class="operation-grid">
+            <div class="operation-box">
+                <h3>📋 Sequential Patient Registry</h3>
+                <p>Browse active patient chart entries in sequential registry order:</p>
+                <div class="results-box">
+                    {% if patients %}
+                        <ul class="linked-list-display">
+                            {% for patient in patients %}
+                                <li>
+                                    <span class="node-id">Patient ID: {{ patient.patient_id }}</span>
+                                    <span class="node-info">&rarr; {{ patient.patient_name }} (Age: {{ patient.age }}, {{ patient.gender }})</span>
+                                </li>
+                            {% endfor %}
+                            <li class="node-end">&bull; End of Active Patient List</li>
+                        </ul>
+                    {% else %}
+                        <p style="color: #999;">No patients currently in the register</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="operation-box">
+                <h3>➕ Register Patient</h3>
+                <p>Add a new patient chart to the records sequence</p>
+                <form action="{{ url_for('add_patient') }}" method="GET">
+                    <button type="submit" class="btn btn-primary btn-full">+ Register New Patient</button>
+                </form>
+
+                <h3 style="margin-top: 25px;">🗑️ Remove Patient</h3>
+                <p>Archive or remove a patient chart</p>
+                <div class="delete-form">
+                    <select id="delete-patient-select" class="form-select">
+                        <option value="">Select a Patient to delete...</option>
+                        {% for patient in patients %}
+                            <option value="{{ patient.patient_id }}">{{ patient.patient_name }} (ID: {{ patient.patient_id }})</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-danger" onclick="deleteLinkedListNode('patients', 'delete-patient-select')">Remove from Register</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Appointments Clinical Register -->
+    <section class="data-structure-section">
+        <h2>📅 Appointment Booking Register</h2>
+        
+        <div class="structure-info">
+            <div class="info-box">
+                <h4>Status</h4>
+                <p><strong>Total Scheduled Appointments:</strong> {{ appointments|length }}</p>
+            </div>
+            <div class="info-box">
+                <h4>Active Sequence</h4>
+                <p class="structure-display">{{ appointments_display }}</p>
+            </div>
+        </div>
+
+        <div class="operation-grid">
+            <div class="operation-box">
+                <h3>📋 Active Appointment List</h3>
+                <p>Browse scheduled consultation bookings in sequential registry order:</p>
+                <div class="results-box">
+                    {% if appointments %}
+                        <ul class="linked-list-display">
+                            {% for appt in appointments %}
+                                <li>
+                                    <span class="node-id">Appt #{{ appt.appointment_id }}</span>
+                                    <span class="node-info">&rarr; Patient #{{ appt.patient_id }} with Doctor #{{ appt.doctor_id }} ({{ appt.appointment_date }} at {{ appt.appointment_time }})</span>
+                                </li>
+                            {% endfor %}
+                            <li class="node-end">&bull; End of Active Bookings</li>
+                        </ul>
+                    {% else %}
+                        <p style="color: #999;">No appointments currently scheduled</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="operation-box">
+                <h3>➕ Book Appointment</h3>
+                <p>Schedule a new medical consultation</p>
+                <form action="{{ url_for('add_appointment') }}" method="GET">
+                    <button type="submit" class="btn btn-primary btn-full">+ Book New Appointment</button>
+                </form>
+
+                <h3 style="margin-top: 25px;">🗑️ Cancel Appointment Record</h3>
+                <p>Remove a consultation record from the register</p>
+                <div class="delete-form">
+                    <select id="delete-appointment-select" class="form-select">
+                        <option value="">Select an Appointment to remove...</option>
+                        {% for appt in appointments %}
+                            <option value="{{ appt.appointment_id }}">Appt #{{ appt.appointment_id }} - Patient {{ appt.patient_id }} ({{ appt.appointment_date }})</option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-danger" onclick="deleteLinkedListNode('appointments', 'delete-appointment-select')">Cancel from Register</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Practical Medical Records Architecture Guide -->
+    <section class="concepts-section">
+        <h2>💡 Dynamic Hospital Records Architecture</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <h3>Dynamic Medical Registers</h3>
+                <p>Patient, doctor, and appointment records are organized as dynamic chains where records can be added or removed seamlessly without system downtime.</p>
+            </div>
+            <div class="concept-card">
+                <h3>Instant Registration</h3>
+                <p>New arrivals and doctor shifts are inserted immediately at the top of the records chain for fast reception desk processing.</p>
+            </div>
+            <div class="concept-card">
+                <h3>Safe Record Deletion</h3>
+                <p>Removing or archiving a discharged patient or cancelled booking cleanly updates adjacent records without data fragmentation.</p>
+            </div>
+            <div class="concept-card">
+                <h3>Continuous Registry Verification</h3>
+                <p>Sequential validation ensures all clinical entries maintain data integrity across database backups and active memory.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.demo-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.demo-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+}
+
+.demo-header p {
+    margin: 0;
+    opacity: 0.95;
+    font-size: 1.05em;
+}
+
+.data-structure-section, .concepts-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.data-structure-section h2, .concepts-section h2 {
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+.structure-info {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.info-box {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.info-box h4 {
+    margin: 0 0 8px 0;
+    color: #64748b;
+    font-size: 0.9em;
+}
+
+.info-box p {
+    margin: 0;
+    color: #1e293b;
+}
+
+.structure-display {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #4f46e5;
+    word-break: break-all;
+}
+
+.operation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.operation-box {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.operation-box h3 {
+    margin: 0 0 8px 0;
+    color: #1e293b;
+    font-size: 1.1em;
+}
+
+.operation-box p {
+    margin: 0 0 15px 0;
+    color: #64748b;
+    font-size: 0.9em;
+}
+
+.results-box {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.linked-list-display {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.linked-list-display li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.linked-list-display li:last-child {
+    border-bottom: none;
+}
+
+.node-id {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.85em;
+}
+
+.node-info {
+    color: #334155;
+}
+
+.node-end {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.delete-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-select {
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
+.concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.concept-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #4f46e5;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.concept-card h3 {
+    color: #4f46e5;
+    margin-bottom: 8px;
+    font-size: 1.05em;
+}
+
+.concept-card p {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.92em;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .structure-info, .operation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function deleteLinkedListNode(listType, selectId) {
+    const selectElement = document.getElementById(selectId);
+    const id = selectElement.value;
+    
+    if (!id) {
+        alert('Please select a record to remove');
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to remove this record from the active register?')) {
+        return;
+    }
+    
+    fetch('/api/linked-list/delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            list_type: listType,
+            id: parseInt(id)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred');
+    });
+}
+</script>
+{% endblock %}

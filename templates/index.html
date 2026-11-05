@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Appointment Booking and Management System{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <section class="hero">
+        <div class="hero-content">
+            <div style="display: inline-block; background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9em; margin-bottom: 16px; letter-spacing: 0.5px;">
+                🏥 MODERN HOSPITAL CLINICAL PLATFORM
+            </div>
+            <h1>Smart Doctor Appointments & Hospital Operations</h1>
+            <p class="subtitle">Streamline specialist scheduling, outpatient triage waiting lines, turn-by-turn indoor corridor navigation, and clinical capacity planning in one integrated system.</p>
+
+            <div class="hero-buttons">
+                <a href="{{ url_for('login') }}" class="btn btn-primary" style="background: white; color: #4338ca; font-weight: 700; padding: 14px 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">Staff & Patient Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-secondary" style="border: 2px solid white; color: white; background: transparent; font-weight: 700; padding: 14px 28px;">New Patient Registration</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Operational Highlights Bar -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px;">
+        <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="font-size: 2.2em;">⚡</div>
+            <div>
+                <h4 style="margin: 0; color: #1e293b; font-size: 1.1em;">Instant Doctor Search</h4>
+                <p style="margin: 0; color: #64748b; font-size: 0.85em;">Logarithmic BST & express filters</p>
+            </div>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="font-size: 2.2em;">🎫</div>
+            <div>
+                <h4 style="margin: 0; color: #1e293b; font-size: 1.1em;">Live Waiting Queue</h4>
+                <p style="margin: 0; color: #64748b; font-size: 0.85em;">Fair FIFO intake with calling board</p>
+            </div>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="font-size: 2.2em;">🗺️</div>
+            <div>
+                <h4 style="margin: 0; color: #1e293b; font-size: 1.1em;">Indoor Wayfinding</h4>
+                <p style="margin: 0; color: #64748b; font-size: 0.85em;">Shortest corridor path to clinic</p>
+            </div>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="font-size: 2.2em;">📅</div>
+            <div>
+                <h4 style="margin: 0; color: #1e293b; font-size: 1.1em;">Conflict-Free Schedules</h4>
+                <p style="margin: 0; color: #64748b; font-size: 0.85em;">Greedy & capacity optimization</p>
+            </div>
+        </div>
+    </div>
+
+    <section class="features">
+        <h2>Hospital Product Capabilities</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">👨‍⚕️</div>
+                <h3>Medical Specialists Roster</h3>
+                <p>Register and search attending doctors across Cardiology, Neurology, Orthopedics, General Medicine, and Surgery with real-time office availability.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <h3>Patient Intake & Medical Records</h3>
+                <p>Register walk-ins or online patients, maintain contact profiles, and check them directly into the live triage waiting line with a single click.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>Seamless Appointment Booking</h3>
+                <p>Schedule doctor appointments with auto-assigned IDs, conflict prevention, real-time status updates (Booked, Completed, Cancelled), and audit logging.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3>Hospital Corridor Wayfinding</h3>
+                <p>Calculate turn-by-turn walking directions from Main Reception to clinical consultation rooms, diagnostic labs, billing, and the pharmacy.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.home-container {
+    width: 100%;
+}
+
+.hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 80px 24px;
+    text-align: center;
+    margin-bottom: 40px;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2);
+}
+
+.hero-content h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.2;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.hero .subtitle {
+    font-size: 1.2em;
+    margin-bottom: 32px;
+    opacity: 0.96;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.features {
+    padding: 30px 0 10px;
+    margin-bottom: 30px;
+}
+
+.features h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background: white;
+    padding: 30px 24px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: 1px solid #eef1ff;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+}
+
+.feature-icon {
+    font-size: 2.8rem;
+    margin-bottom: 12px;
+}
+
+.feature-card h3 {
+    color: #4c5bdc;
+    margin-bottom: 12px;
+}
+
+.feature-card p {
+    margin: 0;
+    color: #555;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 60px 20px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

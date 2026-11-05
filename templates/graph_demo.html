@@ -1,0 +1,710 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Navigation & Route Guide - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="demo-container">
+    <div class="demo-header graph-theme">
+        <h1>🗺️ Hospital Indoor Navigation & Route Guide</h1>
+        <p>Find the shortest walking directions and direct corridor routes between departments, clinics, labs, and the pharmacy</p>
+    </div>
+
+    <!-- Interactive Patient & Staff Route Finder -->
+    <section class="navigation-card route-finder-card">
+        <div class="section-header-row">
+            <div>
+                <h2>🚶 Quick Route & Walking Directions Finder</h2>
+                <p class="section-subtitle">Select your current location and destination to get instant turn-by-turn hallway directions:</p>
+            </div>
+            <div class="badge-group">
+                <span class="badge">Connected Departments: <strong>9 Units</strong></span>
+                <span class="badge">Direct Hallways: <strong>12 Corridors</strong></span>
+                <span class="badge">Campus: <strong>Main Medical Pavilion</strong></span>
+            </div>
+        </div>
+
+        <div class="route-finder-box">
+            <div class="route-inputs-grid">
+                <div class="input-col">
+                    <label for="route-start">📍 Starting Location:</label>
+                    <select id="route-start" class="select-field">
+                        {% for v in vertices %}
+                            <option value="{{ v }}" {% if v == 'Reception' %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="swap-icon-col">
+                    <button type="button" class="btn-swap" onclick="swapLocations()" title="Swap start and destination">⇄</button>
+                </div>
+
+                <div class="input-col">
+                    <label for="route-dest">🎯 Destination Department:</label>
+                    <select id="route-dest" class="select-field">
+                        {% for v in vertices %}
+                            <option value="{{ v }}" {% if v == 'Pharmacy' %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="action-col">
+                    <button class="btn btn-primary btn-find-route" onclick="findWalkingRoute()">🚶 Get Walking Directions</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Route Output -->
+            <div id="route-output-box" class="route-output-box" style="display: none;">
+                <!-- Populated via JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Campus Departments Directory & Direct Corridor Connections -->
+    <section class="navigation-card">
+        <h2>🏢 Hospital Campus Department & Hallway Directory</h2>
+        <p class="section-subtitle">Overview of hospital wings and their direct connecting corridors for easy wayfinding:</p>
+
+        <div class="departments-corridor-grid">
+            {% for vertex, neighbors in adj_list.items() %}
+                <div class="dept-corridor-card">
+                    <div class="dept-card-top">
+                        <span class="dept-icon-badge">
+                            {% if 'Reception' in vertex %}🛎️
+                            {% elif 'Triage' in vertex or 'ER' in vertex %}🚨
+                            {% elif 'Medicine' in vertex %}🩺
+                            {% elif 'Cardiology' in vertex %}❤️
+                            {% elif 'Orthopedics' in vertex %}🦴
+                            {% elif 'Neurology' in vertex %}🧠
+                            {% elif 'Radiology' in vertex or 'Lab' in vertex %}🔬
+                            {% elif 'Pharmacy' in vertex %}💊
+                            {% elif 'Billing' in vertex or 'Discharge' in vertex %}💳
+                            {% else %}🏥{% endif %}
+                        </span>
+                        <div>
+                            <h4>{{ vertex }}</h4>
+                            <span class="corridor-count">{{ neighbors|length }} Direct Connecting Corridors</span>
+                        </div>
+                    </div>
+
+                    <div class="connecting-corridors">
+                        <span class="corridor-label">Direct Pathways to:</span>
+                        <div class="target-pills">
+                            {% for n in neighbors %}
+                                <button class="target-pill-btn" onclick="quickRouteTo('{{ vertex }}', '{{ n }}')" title="Get route from {{ vertex }} to {{ n }}">
+                                    &rarr; {{ n }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Hospital Rounds & Comprehensive Floor Walkthrough -->
+    <section class="navigation-card">
+        <h2>🔄 Campus Rounds & Comprehensive Inspection Walkthroughs</h2>
+        <p class="section-subtitle">Plan efficient staff rounds or comprehensive department walkthroughs starting from any department:</p>
+
+        <div class="controls-row">
+            <div class="control-group">
+                <label for="start-dept">Starting Inspection Department:</label>
+                <select id="start-dept" class="select-field">
+                    {% for v in vertices %}
+                        <option value="{{ v }}">{{ v }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Walkthrough Strategy:</label>
+                <div class="algo-toggle">
+                    <button id="btn-bfs" class="toggle-btn active" onclick="setAlgorithm('bfs')">
+                        <strong>Direct Proximity Walkthrough</strong>
+                        <span>(Nearby Rooms First)</span>
+                    </button>
+                    <button id="btn-dfs" class="toggle-btn" onclick="setAlgorithm('dfs')">
+                        <strong>Deep Wing Walkthrough</strong>
+                        <span>(Wing-by-Wing Exploration)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="control-group submit-group">
+                <button class="btn btn-success" onclick="runGraphTraversal()">Start Campus Walkthrough</button>
+            </div>
+        </div>
+
+        <div id="traversal-output-card" class="traversal-output-card" style="display: none;">
+            <!-- Traversal results will appear here -->
+        </div>
+    </section>
+</div>
+
+<style>
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.graph-theme {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+}
+
+.navigation-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.section-subtitle {
+    color: #64748b;
+    margin-bottom: 25px;
+    font-size: 1.05em;
+}
+
+.badge-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.88em;
+    font-weight: 500;
+}
+
+/* Route Finder */
+.route-finder-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 24px;
+}
+
+.route-inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto;
+    align-items: flex-end;
+    gap: 15px;
+}
+
+.input-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-col label {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+.select-field {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.95em;
+    color: #1e293b;
+}
+
+.swap-icon-col {
+    padding-bottom: 4px;
+}
+
+.btn-swap {
+    background: #e2e8f0;
+    border: none;
+    border-radius: 8px;
+    width: 42px;
+    height: 42px;
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+}
+
+.btn-swap:hover {
+    background: #cbd5e1;
+    color: #0f172a;
+}
+
+.btn-find-route {
+    padding: 12px 24px;
+    font-weight: bold;
+    border-radius: 8px;
+    height: 45px;
+}
+
+.route-output-box {
+    margin-top: 25px;
+    background: white;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
+}
+
+.route-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.route-summary-header h3 {
+    margin: 0;
+    color: #0369a1;
+    font-size: 1.2em;
+}
+
+.route-meta-pills {
+    display: flex;
+    gap: 10px;
+}
+
+.route-meta-pill {
+    background: #f0fdf4;
+    color: #15803d;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.route-path-visual {
+    margin-bottom: 20px;
+}
+
+.route-path-visual h4 {
+    margin: 0 0 10px 0;
+    color: #334155;
+    font-size: 0.95em;
+}
+
+.path-flex-flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.route-step-pill {
+    background: #0284c7;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.92em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.route-step-num {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.route-arrow {
+    color: #0284c7;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.turn-by-turn-list {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 20px;
+}
+
+.turn-by-turn-list h4 {
+    margin: 0 0 10px 0;
+    color: #1e293b;
+    font-size: 0.95em;
+}
+
+.directions-ol {
+    margin: 0;
+    padding-left: 20px;
+    color: #334155;
+    line-height: 1.7;
+    font-size: 0.95em;
+}
+
+/* Department Corridor Cards */
+.departments-corridor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.dept-corridor-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dept-corridor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border-color: #cbd5e1;
+}
+
+.dept-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dept-icon-badge {
+    font-size: 1.8em;
+}
+
+.dept-card-top h4 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.05em;
+}
+
+.corridor-count {
+    font-size: 0.8em;
+    color: #64748b;
+}
+
+.connecting-corridors {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.corridor-label {
+    font-size: 0.82em;
+    color: #475569;
+    font-weight: 600;
+}
+
+.target-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.target-pill-btn {
+    background: white;
+    border: 1px solid #cbd5e1;
+    color: #0369a1;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.84em;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.target-pill-btn:hover {
+    background: #0284c7;
+    color: white;
+    border-color: #0284c7;
+}
+
+/* Walkthrough Controls */
+.controls-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 20px;
+    align-items: flex-end;
+    background: #f8fafc;
+    padding: 22px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 25px;
+}
+
+.algo-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.toggle-btn {
+    background: white;
+    border: 2px solid #e2e8f0;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.toggle-btn strong {
+    font-size: 0.95em;
+    color: #1e293b;
+}
+
+.toggle-btn span {
+    font-size: 0.8em;
+    color: #64748b;
+}
+
+.toggle-btn.active {
+    border-color: #0284c7;
+    background: #f0f9ff;
+}
+
+.toggle-btn.active strong {
+    color: #0369a1;
+}
+
+.traversal-output-card {
+    background: #f8fafc;
+    padding: 25px;
+    border-radius: 10px;
+    border-left: 5px solid #0284c7;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.traversal-output-card h3 {
+    color: #0369a1;
+    margin-bottom: 6px;
+}
+
+.meta-info {
+    color: #475569;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+}
+
+.visited-path {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.visited-path h4 {
+    margin: 0 0 10px 0;
+    color: #1e293b;
+}
+
+.path-flex {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.path-pill {
+    background: #0284c7;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.step-num {
+    background: rgba(255,255,255,0.25);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.trace-log {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.trace-log h4 {
+    margin: 0 0 10px 0;
+    color: #1e293b;
+}
+
+.trace-log ol {
+    margin: 0;
+    padding-left: 20px;
+    color: #334155;
+    line-height: 1.6;
+    font-size: 0.95em;
+}
+
+@media (max-width: 900px) {
+    .route-inputs-grid {
+        grid-template-columns: 1fr;
+    }
+    .swap-icon-col {
+        display: none;
+    }
+    .controls-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+let currentAlgorithm = 'bfs';
+
+function setAlgorithm(algo) {
+    currentAlgorithm = algo;
+    document.getElementById('btn-bfs').classList.toggle('active', algo === 'bfs');
+    document.getElementById('btn-dfs').classList.toggle('active', algo === 'dfs');
+}
+
+function swapLocations() {
+    const startEl = document.getElementById('route-start');
+    const destEl = document.getElementById('route-dest');
+    const temp = startEl.value;
+    startEl.value = destEl.value;
+    destEl.value = temp;
+    findWalkingRoute();
+}
+
+function quickRouteTo(start, dest) {
+    document.getElementById('route-start').value = start;
+    document.getElementById('route-dest').value = dest;
+    findWalkingRoute();
+    document.querySelector('.route-finder-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+function findWalkingRoute() {
+    const start = document.getElementById('route-start').value;
+    const dest = document.getElementById('route-dest').value;
+
+    fetch('/api/graph/route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start: start, destination: dest })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const out = document.getElementById('route-output-box');
+        out.style.display = 'block';
+
+        if (data.error) {
+            out.innerHTML = `<p style="color: #ef4444; margin: 0;"><strong>Error:</strong> ${data.error}</p>`;
+            return;
+        }
+
+        const estMinutes = Math.max(1, (data.steps_count || 1) * 1.5).toFixed(0);
+
+        out.innerHTML = `
+            <div class="route-summary-header">
+                <h3>🚶 Route: ${data.start} &rarr; ${data.destination}</h3>
+                <div class="route-meta-pills">
+                    <span class="route-meta-pill">Corridors: ${data.steps_count} Hallways</span>
+                    <span class="route-meta-pill">Est. Walk Time: ~${estMinutes} Mins</span>
+                </div>
+            </div>
+
+            <div class="route-path-visual">
+                <h4>Walking Route Sequence:</h4>
+                <div class="path-flex-flow">
+                    ${data.path.map((item, idx) => `
+                        <span class="route-step-pill">
+                            <span class="route-step-num">${idx + 1}</span> ${item}
+                        </span>
+                        ${idx < data.path.length - 1 ? '<span class="route-arrow">&rarr;</span>' : ''}
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="turn-by-turn-list">
+                <h4>Turn-by-Turn Hallway Directions:</h4>
+                <ol class="directions-ol">
+                    ${data.directions.map(d => `<li>${d}</li>`).join('')}
+                </ol>
+            </div>
+        `;
+    })
+    .catch(err => {
+        console.error('Error finding route:', err);
+    });
+}
+
+function runGraphTraversal() {
+    const startVertex = document.getElementById('start-dept').value;
+
+    fetch('/api/graph/traverse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start_vertex: startVertex, algorithm: currentAlgorithm })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const out = document.getElementById('traversal-output-card');
+        out.style.display = 'block';
+
+        const stratName = currentAlgorithm === 'bfs' ? 'Direct Proximity Walkthrough' : 'Deep Wing Walkthrough';
+
+        out.innerHTML = `
+            <h3>${stratName} from '${data.start_vertex}'</h3>
+            <p class="meta-info"><strong>Navigation Pattern:</strong> ${data.algorithm} &nbsp;|&nbsp; <strong>${data.summary}</strong></p>
+            
+            <div class="visited-path">
+                <h4>Campus Inspection Path:</h4>
+                <div class="path-flex">
+                    ${data.traversal_order.map((item, idx) => `
+                        <span class="path-pill"><span class="step-num">${idx + 1}</span> ${item}</span>
+                        ${idx < data.traversal_order.length - 1 ? '<span class="arrow">→</span>' : ''}
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="trace-log">
+                <h4>Step-by-Step Inspection Log:</h4>
+                <ol>${data.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+            </div>
+        `;
+        out.scrollIntoView({ behavior: 'smooth' });
+    })
+    .catch(err => console.error('Error running walkthrough:', err));
+}
+
+// Auto-run walking route on load
+document.addEventListener('DOMContentLoaded', () => {
+    findWalkingRoute();
+});
+</script>
+{% endblock %}

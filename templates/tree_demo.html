@@ -1,0 +1,780 @@
+{% extends "base.html" %}
+
+{% block title %}Department & Doctor Hierarchy - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="demo-container">
+    <div class="demo-header tree-theme">
+        <h1>🏥 Hospital Department Hierarchy & Medical Staff Organization</h1>
+        <p>Enterprise medical division structure, department leadership, and attending physician reporting hierarchy</p>
+    </div>
+
+    <!-- Executive & Medical Staff Organizational Hierarchy Chart -->
+    <section class="tree-section">
+        <div class="section-header-row">
+            <div>
+                <h2>🏥 Hospital Leadership & Department Hierarchy Chart</h2>
+                <p class="section-subtitle">Reporting structure from Chief Medical Officer to Division Heads, Department Leads, and Attending Physicians:</p>
+            </div>
+            <div class="tree-metrics">
+                <div class="metric-badge">Divisions: <strong>2 Major Wings</strong></div>
+                <div class="metric-badge">Departments: <strong>4 Specialized Units</strong></div>
+                <div class="metric-badge">Governance: <strong>Multi-Tier Medical Roster</strong></div>
+            </div>
+        </div>
+
+        <div class="tree-visual-box">
+            <div class="tree-hierarchy">
+                <!-- Executive Level -->
+                <div class="tree-level level-0">
+                    <div class="tree-node root-node">
+                        <div class="node-tag">EXECUTIVE LEADERSHIP</div>
+                        <strong>{{ doctor_hierarchy.cmo.name }}</strong>
+                        <span class="node-subtext">{{ doctor_hierarchy.cmo.title }}</span>
+                    </div>
+                </div>
+                
+                <div class="tree-branches">
+                    <span class="branch-left">↙ Clinical Services Wing</span>
+                    <span class="branch-right">↘ Surgical Services Wing</span>
+                </div>
+
+                <!-- Division Level -->
+                <div class="tree-level level-1">
+                    <div class="tree-node division-node">
+                        <div class="node-tag">DIVISION 1</div>
+                        <strong>Clinical Services</strong>
+                        <span class="node-subtext">Head: {{ doctor_hierarchy.divisions[0].head_name }}</span>
+                    </div>
+                    <div class="tree-node division-node">
+                        <div class="node-tag">DIVISION 2</div>
+                        <strong>Surgical Services</strong>
+                        <span class="node-subtext">Head: {{ doctor_hierarchy.divisions[1].head_name }}</span>
+                    </div>
+                </div>
+
+                <div class="tree-branches sub-branches">
+                    <span class="sub-left">↙ ↘</span>
+                    <span class="sub-right">↙ ↘</span>
+                </div>
+
+                <!-- Department Units Level -->
+                <div class="tree-level level-2">
+                    <div class="tree-node dept-node">
+                        <div class="node-tag">DEPARTMENT</div>
+                        <strong>🩺 General Medicine</strong>
+                        <span class="node-doctor">Lead: Dr. Robert Patel</span>
+                    </div>
+                    <div class="tree-node dept-node">
+                        <div class="node-tag">DEPARTMENT</div>
+                        <strong>❤️ Cardiology</strong>
+                        <span class="node-doctor">Lead: Dr. Sarah Jenkins</span>
+                    </div>
+                    <div class="tree-node dept-node">
+                        <div class="node-tag">DEPARTMENT</div>
+                        <strong>🦴 Orthopedics</strong>
+                        <span class="node-doctor">Lead: Dr. Emily Taylor</span>
+                    </div>
+                    <div class="tree-node dept-node">
+                        <div class="node-tag">DEPARTMENT</div>
+                        <strong>🧠 Neurology</strong>
+                        <span class="node-doctor">Lead: Dr. Michael Chen</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comprehensive Doctor Hierarchy & Staffing by Department -->
+    <section class="doctor-hierarchy-section">
+        <h2>👨‍⚕️ Medical Staff Hierarchy & Department Rosters</h2>
+        <p class="section-subtitle">Detailed physician staffing, clinical roles, on-duty hours, and reporting tiers for each clinical department:</p>
+
+        <div class="divisions-container">
+            {% for div in doctor_hierarchy.divisions %}
+                <div class="division-block">
+                    <div class="division-header">
+                        <div>
+                            <h3>🏢 {{ div.name }}</h3>
+                            <span class="division-sub">{{ div.wing }} &bull; Division Chief: <strong>{{ div.head_name }}</strong> ({{ div.head_title }})</span>
+                        </div>
+                    </div>
+
+                    <div class="departments-grid">
+                        {% for dept in div.departments %}
+                            <div class="department-card">
+                                <div class="dept-card-header">
+                                    <div class="dept-title-group">
+                                        <span class="dept-icon">{{ dept.icon }}</span>
+                                        <div>
+                                            <h4>{{ dept.name }} Department</h4>
+                                            <span class="dept-location">📍 {{ dept.floor }}</span>
+                                        </div>
+                                    </div>
+                                    <a href="{{ url_for('add_appointment', doctor_id=dept.head_doctor.id) }}" class="btn btn-primary btn-xs">Book Appointment</a>
+                                </div>
+
+                                <!-- Tier 1: Department Head -->
+                                <div class="staff-tier head-tier">
+                                    <div class="tier-label">⭐ Department Head & Lead Specialist</div>
+                                    <div class="doctor-profile-card">
+                                        <div class="doc-main-info">
+                                            <div class="doc-avatar">👨‍⚕️</div>
+                                            <div>
+                                                <strong>{{ dept.head_doctor.name }}</strong> (ID: {{ dept.head_doctor.id }})
+                                                <div class="doc-role">{{ dept.head_doctor.title }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="doc-details-grid">
+                                            <div><span>📞 Phone:</span> {{ dept.head_doctor.phone }}</div>
+                                            <div><span>✉️ Email:</span> {{ dept.head_doctor.email }}</div>
+                                            <div class="full-span"><span>⏰ Schedule:</span> {{ dept.head_doctor.schedule }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tier 2 & 3: Attending Specialists & Clinical Fellows -->
+                                <div class="staff-tier attending-tier">
+                                    <div class="tier-label">👥 Attending Physicians & Resident Doctors</div>
+                                    <div class="staff-doctors-list">
+                                        {% for staff in dept.staff_doctors %}
+                                            <div class="staff-member-item">
+                                                <div class="staff-header-row">
+                                                    <div>
+                                                        <strong>{{ staff.name }}</strong>
+                                                        {% if staff.id %}
+                                                            <span class="staff-id-badge">ID: {{ staff.id }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <span class="staff-rank-badge rank-{{ staff.rank|lower|replace(' ', '-') }}">{{ staff.rank }}</span>
+                                                </div>
+                                                <div class="staff-meta">
+                                                    <span>🩺 {{ staff.specialization }}</span> &bull; 
+                                                    <span>⏰ {{ staff.schedule }}</span>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Interactive Clinical Review & Inspection Walkthroughs -->
+    <section class="traversals-section">
+        <h2>🔄 Clinical Review & Department Inspection Walkthroughs</h2>
+        <p class="section-subtitle">Select an operational inspection mode to view the structured departmental review path across hospital wings:</p>
+
+        <div class="traversal-buttons">
+            <button class="btn btn-traversal active" onclick="loadTraversal('inorder')">
+                <strong>Standard Clinical Walkthrough</strong>
+                <span>(Ward-by-Ward Clinical Review)</span>
+            </button>
+            <button class="btn btn-traversal" onclick="loadTraversal('preorder')">
+                <strong>Executive Briefing Route</strong>
+                <span>(Top-Down Leadership Review)</span>
+            </button>
+            <button class="btn btn-traversal" onclick="loadTraversal('postorder')">
+                <strong>Department Audit Rollup</strong>
+                <span>(Bottom-Up Performance Review)</span>
+            </button>
+        </div>
+
+        <div class="traversal-result-card" id="traversal-result">
+            <h3 id="traversal-title">Standard Clinical Walkthrough</h3>
+            <p id="traversal-desc" class="desc-text">Standard Clinical Walkthrough: Inspects department units systematically in operational sequence across clinical and surgical wings.</p>
+            
+            <div class="sequence-box">
+                <h4>Unit Inspection Sequence:</h4>
+                <div id="sequence-items" class="sequence-items">
+                    {% for item in inorder %}
+                        <span class="seq-tag"><span class="step-num">{{ loop.index }}</span> {{ item }}</span>
+                        {% if not loop.last %}<span class="arrow">→</span>{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="trace-box">
+                <h4>Inspection Checkpoints & Steps:</h4>
+                <ol id="steps-list" class="steps-list">
+                    <li>Proceed to division branch 'Chief Medical Officer' → 'Clinical Services'</li>
+                    <li>Proceed to division branch 'Clinical Services' → 'General Medicine'</li>
+                    <li>Review Department / Unit: 'General Medicine'</li>
+                    <li>Review Department / Unit: 'Clinical Services'</li>
+                    <li>Proceed to division branch 'Clinical Services' → 'Cardiology'</li>
+                    <li>Review Department / Unit: 'Cardiology'</li>
+                    <li>Review Department / Unit: 'Chief Medical Officer' (Executive level verified)</li>
+                    <li>Proceed to division branch 'Chief Medical Officer' → 'Surgical Services'</li>
+                    <li>Proceed to division branch 'Surgical Services' → 'Orthopedics'</li>
+                    <li>Review Department / Unit: 'Orthopedics'</li>
+                    <li>Review Department / Unit: 'Surgical Services'</li>
+                    <li>Proceed to division branch 'Surgical Services' → 'Neurology'</li>
+                    <li>Review Department / Unit: 'Neurology'</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <!-- Practical Medical Governance Guide -->
+    <section class="concepts-section">
+        <h2>💡 Hospital Clinical Governance & Reporting Architecture</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <h3>Executive Medical Governance</h3>
+                <p>The Chief Medical Officer oversees all clinical quality, regulatory compliance, and patient care standards across the entire medical campus.</p>
+            </div>
+            <div class="concept-card">
+                <h3>Division Leadership</h3>
+                <p>Divisions separate medicine into Clinical Services (outpatient, diagnostics, cardiology) and Surgical Services (operating suites, orthopedics, neurosurgery).</p>
+            </div>
+            <div class="concept-card">
+                <h3>Department Heads</h3>
+                <p>Senior clinical consultants responsible for daily department triage, physician scheduling, specialized treatments, and clinical escalations.</p>
+            </div>
+            <div class="concept-card">
+                <h3>Attending & Resident Physicians</h3>
+                <p>Front-line medical practitioners conducting patient consultations, admitting patients, managing treatments, and staffing emergency rotas.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tree-theme {
+    background: linear-gradient(135deg, #0d9488 0%, #10b981 100%) !important;
+}
+
+.tree-section, .doctor-hierarchy-section, .traversals-section, .concepts-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.section-subtitle {
+    color: #64748b;
+    margin-bottom: 25px;
+    font-size: 1.05em;
+}
+
+.tree-visual-box {
+    background: #f8fafc;
+    padding: 35px 20px;
+    border-radius: 10px;
+    border: 2px dashed #cbd5e1;
+    text-align: center;
+}
+
+.tree-hierarchy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.tree-level {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    width: 100%;
+}
+
+.tree-node {
+    background: white;
+    border: 2px solid #0d9488;
+    padding: 14px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 180px;
+}
+
+.root-node {
+    background: #0f766e;
+    color: white;
+    border-color: #0f766e;
+    min-width: 260px;
+    padding: 16px 24px;
+}
+
+.root-node strong {
+    font-size: 1.15em;
+}
+
+.division-node {
+    background: #f0fdf4;
+    border-color: #16a34a;
+    min-width: 220px;
+}
+
+.dept-node {
+    background: #ffffff;
+    border-color: #0284c7;
+    flex: 1;
+    max-width: 240px;
+}
+
+.node-tag {
+    font-size: 0.72em;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    opacity: 0.85;
+    margin-bottom: 4px;
+}
+
+.node-subtext {
+    font-size: 0.85em;
+    color: #475569;
+    margin-top: 4px;
+}
+
+.root-node .node-subtext {
+    color: #ccfbf1;
+}
+
+.node-doctor {
+    font-size: 0.82em;
+    color: #0369a1;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.tree-branches {
+    display: flex;
+    justify-content: space-around;
+    width: 60%;
+    color: #0d9488;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.sub-branches {
+    width: 90%;
+    font-size: 1.1em;
+    color: #64748b;
+}
+
+.tree-metrics {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.metric-badge {
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    border: 1px solid #a7f3d0;
+}
+
+/* Doctor Hierarchy Section */
+.division-block {
+    margin-bottom: 30px;
+}
+
+.division-header {
+    background: #f1f5f9;
+    padding: 14px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 5px solid #0d9488;
+}
+
+.division-header h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.25em;
+}
+
+.division-sub {
+    font-size: 0.9em;
+    color: #475569;
+}
+
+.departments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+    gap: 22px;
+}
+
+.department-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.dept-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 15px;
+}
+
+.dept-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dept-icon {
+    font-size: 1.8em;
+}
+
+.dept-card-header h4 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.15em;
+}
+
+.dept-location {
+    font-size: 0.85em;
+    color: #64748b;
+}
+
+.staff-tier {
+    margin-bottom: 15px;
+}
+
+.tier-label {
+    font-size: 0.82em;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #475569;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.doctor-profile-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.doc-main-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.doc-avatar {
+    font-size: 1.6em;
+}
+
+.doc-role {
+    font-size: 0.85em;
+    color: #0284c7;
+    font-weight: 600;
+}
+
+.doc-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    font-size: 0.86em;
+    color: #334155;
+}
+
+.doc-details-grid .full-span {
+    grid-column: span 2;
+}
+
+.doc-details-grid span {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.staff-doctors-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.staff-member-item {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 6px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.staff-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.staff-id-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 0.75em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+.staff-rank-badge {
+    font-size: 0.75em;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.rank-consultant, .rank-senior-consultant, .rank-associate-consultant {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.rank-resident, .rank-resident-physician, .rank-resident-surgeon {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.rank-clinical-fellow, .rank-fellow, .rank-specialist {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.staff-meta {
+    font-size: 0.82em;
+    color: #64748b;
+}
+
+/* Traversals Section */
+.traversal-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.btn-traversal {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    padding: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-traversal strong {
+    color: #1e293b;
+    font-size: 1.05em;
+}
+
+.btn-traversal span {
+    color: #64748b;
+    font-size: 0.85em;
+}
+
+.btn-traversal:hover {
+    border-color: #0d9488;
+    background: #f0fdfa;
+}
+
+.btn-traversal.active {
+    background: #0d9488;
+    border-color: #0d9488;
+}
+
+.btn-traversal.active strong,
+.btn-traversal.active span {
+    color: white;
+}
+
+.traversal-result-card {
+    background: #f8fafc;
+    padding: 25px;
+    border-radius: 8px;
+    border-left: 5px solid #0d9488;
+}
+
+.traversal-result-card h3 {
+    color: #0f766e;
+    margin-bottom: 8px;
+}
+
+.desc-text {
+    color: #475569;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+}
+
+.sequence-box, .trace-box {
+    background: white;
+    padding: 18px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    border: 1px solid #e2e8f0;
+}
+
+.sequence-box h4, .trace-box h4 {
+    margin-bottom: 12px;
+    color: #1e293b;
+}
+
+.sequence-items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.seq-tag {
+    background: #0d9488;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.step-num {
+    background: rgba(255,255,255,0.25);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.arrow {
+    color: #0d9488;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.steps-list {
+    margin: 0;
+    padding-left: 20px;
+    color: #334155;
+    line-height: 1.7;
+    font-size: 0.95em;
+}
+
+/* Concepts Grid */
+.concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.concept-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #0d9488;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.concept-card h3 {
+    color: #0f766e;
+    margin-bottom: 8px;
+    font-size: 1.05em;
+}
+
+.concept-card p {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.92em;
+    margin: 0;
+}
+
+.btn-xs {
+    padding: 6px 12px;
+    font-size: 0.82em;
+    border-radius: 6px;
+}
+
+@media (max-width: 900px) {
+    .departments-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tree-level {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .tree-branches {
+        display: none;
+    }
+}
+</style>
+
+<script>
+function loadTraversal(traversalType) {
+    document.querySelectorAll('.btn-traversal').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    fetch('/api/tree/traverse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ traversal_type: traversalType })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const titleEl = document.getElementById('traversal-title');
+        const descEl = document.getElementById('traversal-desc');
+        const seqEl = document.getElementById('sequence-items');
+        const stepsEl = document.getElementById('steps-list');
+
+        let displayTitle = 'Standard Clinical Walkthrough';
+        if (traversalType === 'preorder') displayTitle = 'Executive Briefing Route (Top-Down)';
+        else if (traversalType === 'postorder') displayTitle = 'Department Audit Rollup (Bottom-Up)';
+        else if (traversalType === 'inorder') displayTitle = 'Standard Clinical Walkthrough (Ward-by-Ward)';
+
+        titleEl.textContent = displayTitle;
+        descEl.textContent = data.description;
+
+        seqEl.innerHTML = data.sequence.map((item, idx) => {
+            let html = `<span class="seq-tag"><span class="step-num">${idx + 1}</span> ${item}</span>`;
+            if (idx < data.sequence.length - 1) {
+                html += `<span class="arrow">→</span>`;
+            }
+            return html;
+        }).join('');
+
+        stepsEl.innerHTML = data.steps.map(step => `<li>${step}</li>`).join('');
+    })
+    .catch(err => console.error('Error fetching inspection walkthrough:', err));
+}
+</script>
+{% endblock %}

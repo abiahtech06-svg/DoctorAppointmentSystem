@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Staff Index & Fast Search - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="demo-container">
+    <div class="demo-header bst-theme">
+        <h1>⚡ Medical Specialist Registry & Instant Staff ID Lookup</h1>
+        <p>Instantaneous physician record lookup by Staff ID & automated numerical staff registry</p>
+    </div>
+
+    <!-- Search Section -->
+    <section class="bst-card">
+        <h2>⚡ Instant Doctor Lookup by Staff ID</h2>
+        <p class="section-subtitle">Search for any doctor by Staff ID to instantly locate their department, on-duty hours, and contact details:</p>
+
+        <div class="search-form-row">
+            <input type="number" id="search-doc-id" class="input-field" placeholder="Enter Doctor ID (e.g. 101, 102, 103, 104, 105)...">
+            <button class="btn btn-primary" onclick="searchBST()">🔍 Search Doctor</button>
+        </div>
+
+        <div id="search-result-box" class="search-result-box" style="display: none;">
+            <!-- Populated via JavaScript -->
+        </div>
+    </section>
+
+    <!-- Sorted Records Section -->
+    <section class="bst-card">
+        <div class="section-header-row">
+            <div>
+                <h2>📋 Numerical Staff Registry</h2>
+                <p class="section-subtitle">Physicians are automatically indexed in strictly sorted order by Staff ID for high-speed reception desk lookup and scheduling:</p>
+            </div>
+            <div class="badge-count">Total Active Staff: <strong id="total-nodes-badge">{{ total_nodes }}</strong></div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="styled-table" id="bst-doctors-table">
+                <thead>
+                    <tr>
+                        <th>Doctor ID</th>
+                        <th>Doctor Name</th>
+                        <th>Specialization</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Quick Action</th>
+                    </tr>
+                </thead>
+                <tbody id="bst-table-body">
+                    {% if sorted_doctors %}
+                        {% for record in sorted_doctors %}
+                            <tr>
+                                <td><span class="id-tag">ID: {{ record.key }}</span></td>
+                                <td><strong>{{ record.data.doctor_name if record.data.doctor_name else 'Doctor ' ~ record.key }}</strong></td>
+                                <td><span class="dept-badge">{{ record.data.specialization if record.data.specialization else 'General Medicine' }}</span></td>
+                                <td>{{ record.data.phone if record.data.phone else 'N/A' }}</td>
+                                <td>{{ record.data.email if record.data.email else 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ url_for('add_appointment', doctor_id=record.key) }}" class="btn btn-primary btn-xs">Book</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-muted text-center">No doctors currently indexed in the registry. Add a doctor below!</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Insert Doctor Section -->
+    <section class="bst-card">
+        <h2>➕ Register New Doctor into Fast Index</h2>
+        <p class="section-subtitle">Add a medical practitioner directly into the active search index for immediate booking availability:</p>
+
+        <form id="bst-insert-form" class="insert-grid" onsubmit="event.preventDefault(); insertIntoBST();">
+            <div class="form-group">
+                <label>Doctor ID (Unique Number):</label>
+                <input type="number" id="new-doc-id" class="input-field" required placeholder="e.g. 106">
+            </div>
+            <div class="form-group">
+                <label>Doctor Full Name:</label>
+                <input type="text" id="new-doc-name" class="input-field" required placeholder="e.g. Dr. Alex Mercer">
+            </div>
+            <div class="form-group">
+                <label>Medical Specialization:</label>
+                <input type="text" id="new-doc-spec" class="input-field" required placeholder="e.g. Dermatology">
+            </div>
+            <div class="form-group submit-group">
+                <button type="submit" class="btn btn-success btn-full">Register Doctor in Directory</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Practical Medical Registry Architecture Guide -->
+    <section class="concepts-section">
+        <h2>💡 High-Efficiency Hospital Registry Architecture</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <h3>Instant Staff ID Lookup</h3>
+                <p>Enables emergency desks and receptionists to find any doctor's profile, consultation room, and availability in milliseconds.</p>
+            </div>
+            <div class="concept-card">
+                <h3>Automatic Ordered Roster</h3>
+                <p>Maintains staff directories in strict numerical order automatically without needing costly periodic sorting operations.</p>
+            </div>
+            <div class="concept-card">
+                <h3>Dynamic Staff Management</h3>
+                <p>Allows adding on-call specialists or removing retired practitioners on the fly while preserving search performance.</p>
+            </div>
+            <div class="concept-card">
+                <h3>Integrated Booking Workflow</h3>
+                <p>Instantly connects located doctors to appointment booking forms with pre-filled medical specialty details.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.bst-theme {
+    background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%) !important;
+}
+
+.bst-card, .concepts-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.section-subtitle {
+    color: #64748b;
+    margin-bottom: 20px;
+    font-size: 1.05em;
+}
+
+.badge-count {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9em;
+}
+
+.search-form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.input-field {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+.search-result-box {
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.search-result-box.found {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #166534;
+}
+
+.search-result-box.not-found {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.search-result-box h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.trace-steps {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+    border: 1px solid #e2e8f0;
+}
+
+.trace-steps h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #1e293b;
+    font-size: 0.95em;
+}
+
+.trace-steps ol {
+    margin: 0;
+    padding-left: 20px;
+    color: #475569;
+    font-size: 0.92em;
+    line-height: 1.6;
+}
+
+/* Styled Table */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.styled-table thead tr {
+    background-color: #f8fafc;
+    color: #334155;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.styled-table th, .styled-table td {
+    padding: 14px 16px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.15s;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.id-tag {
+    background: #e2e8f0;
+    color: #1e293b;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.88em;
+}
+
+.dept-badge {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.88em;
+    font-weight: 500;
+}
+
+.insert-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.88em;
+    font-weight: bold;
+    color: #334155;
+}
+
+.btn-full {
+    height: 44px;
+    padding: 0 20px;
+    font-weight: bold;
+}
+
+.btn-xs {
+    padding: 6px 12px;
+    font-size: 0.82em;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.concept-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #0284c7;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.concept-card h3 {
+    color: #0284c7;
+    margin-bottom: 8px;
+    font-size: 1.05em;
+}
+
+.concept-card p {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.92em;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .insert-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function searchBST() {
+    const key = document.getElementById('search-doc-id').value.trim();
+    if (!key) {
+        alert('Please enter a Doctor ID');
+        return;
+    }
+
+    fetch('/api/bst/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: key })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const box = document.getElementById('search-result-box');
+        box.style.display = 'block';
+
+        if (data.found) {
+            box.className = 'search-result-box found';
+            const doc = data.doctor;
+            box.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3>✓ Doctor Record Located (Staff ID: ${data.key})</h3>
+                        <p style="margin: 0 0 8px 0;"><strong>Name:</strong> ${doc.doctor_name || 'Dr. Specialist'} &bull; 
+                           <strong>Department:</strong> ${doc.specialization || 'General Medicine'} &bull; 
+                           <strong>Phone:</strong> ${doc.phone || 'N/A'} &bull;
+                           <strong>Email:</strong> ${doc.email || 'N/A'}</p>
+                    </div>
+                    <a href="/add-appointment?doctor_id=${data.key}" class="btn btn-primary btn-xs">Book Appointment</a>
+                </div>
+                <div class="trace-steps">
+                    <h4>Direct Staff ID Verification Path:</h4>
+                    <ol>${data.trace.map(t => `<li>${t}</li>`).join('')}</ol>
+                </div>
+            `;
+        } else {
+            box.className = 'search-result-box not-found';
+            box.innerHTML = `
+                <h3>✗ No Doctor Found with Staff ID ${data.key}</h3>
+                <p>The specified ID is not currently registered in the hospital medical staff index.</p>
+                <div class="trace-steps">
+                    <h4>Lookup Verification Path:</h4>
+                    <ol>${data.trace.map(t => `<li>${t}</li>`).join('')}</ol>
+                </div>
+            `;
+        }
+    })
+    .catch(err => console.error('Error searching staff registry:', err));
+}
+
+function insertIntoBST() {
+    const key = document.getElementById('new-doc-id').value.trim();
+    const name = document.getElementById('new-doc-name').value.trim();
+    const spec = document.getElementById('new-doc-spec').value.trim();
+
+    fetch('/api/bst/insert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: key, name: name, specialization: spec })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        document.getElementById('total-nodes-badge').textContent = data.total_nodes;
+
+        // Refresh table with sorted records
+        const tbody = document.getElementById('bst-table-body');
+        tbody.innerHTML = data.sorted_doctors.map(r => `
+            <tr>
+                <td><span class="id-tag">ID: ${r.key}</span></td>
+                <td><strong>${r.data.doctor_name || 'Doctor ' + r.key}</strong></td>
+                <td><span class="dept-badge">${r.data.specialization || 'General Medicine'}</span></td>
+                <td>${r.data.phone || 'N/A'}</td>
+                <td>${r.data.email || 'N/A'}</td>
+                <td>
+                    <a href="/add-appointment?doctor_id=${r.key}" class="btn btn-primary btn-xs">Book</a>
+                </td>
+            </tr>
+        `).join('');
+
+        // Reset inputs
+        document.getElementById('new-doc-id').value = '';
+        document.getElementById('new-doc-name').value = '';
+        document.getElementById('new-doc-spec').value = '';
+    })
+    .catch(err => console.error('Error registering doctor:', err));
+}
+</script>
+{% endblock %}

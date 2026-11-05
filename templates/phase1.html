@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Triage & Operational Records{% endblock %}
+
+{% block content %}
+<div class="phase1-container">
+    <div class="phase1-header">
+        <h1>👥 PATIENT TRIAGE, AUDIT LOG & CLINICAL REGISTERS</h1>
+        <p>Real-Time Hospital Patient Triage, Activity History, and Dynamic Record Registers</p>
+    </div>
+
+    <!-- Overview Section -->
+    <section class="overview">
+        <h2>Hospital Daily Operational Engines</h2>
+        <div class="overview-content">
+            <p>This operational system powers core hospital intake and consultation workflows: organizing patient and physician profiles dynamically, maintaining immediate audit histories of bookings and cancellations, and managing live consultation waiting lines fairly and transparently.</p>
+            
+            <div class="key-concepts">
+                <div class="concept-card">
+                    <h3>🔗 Dynamic Clinical Registers</h3>
+                    <p>Connected record sequences for Doctors, Patients, and Appointments that support instantaneous insertion and deletion without system downtime.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>📚 Action & Audit History</h3>
+                    <p>Activity audit log tracking every appointment booking and cancellation, ensuring the most recent administrative event is immediately accessible for review or undo.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🎫 Live Patient Triage Queue</h3>
+                    <p>Fair waiting line ensuring arriving patients are called into doctor consultation rooms strictly in the sequence they checked in at reception.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>✓ Prescription Formula Validator</h3>
+                    <p>Immediate syntax checking for dosage ranges, nested medical formulas, and pharmaceutical notation to avoid prescription entry errors.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Structures Demonstrations -->
+    <section class="demonstrations">
+        <h2>🎯 Interactive Clinical Workflows</h2>
+        <p>Select any module below to inspect live hospital registers, review the audit stack, or manage the patient queue.</p>
+        
+        <div class="demo-grid">
+            <!-- Linked List Demo -->
+            <div class="demo-card">
+                <div class="demo-icon">🔗</div>
+                <h3>Dynamic Medical Registers</h3>
+                <p><strong>Operations:</strong> Add, Remove, Browse Records</p>
+                <p><strong>Registers:</strong> Doctors, Patients, Appointments</p>
+                <div class="demo-description">
+                    <p>✓ Register new patients and doctors in real time</p>
+                    <p>✓ Remove inactive records immediately by ID</p>
+                    <p>✓ Seamless chronological browsing of appointments</p>
+                    <p>✓ Dynamic sequential record management</p>
+                </div>
+                <a href="{{ url_for('linked_list_demo') }}" class="btn btn-primary">Open Medical Registers →</a>
+            </div>
+
+            <!-- Stack Demo -->
+            <div class="demo-card">
+                <div class="demo-icon">📚</div>
+                <h3>Recent Action & Audit Log</h3>
+                <p><strong>Operations:</strong> Log Event, Inspect Last, Undo Action</p>
+                <p><strong>Audit Scope:</strong> Appointment Bookings & Cancellations</p>
+                <div class="demo-description">
+                    <p>✓ Real-time tracking of staff desk operations</p>
+                    <p>✓ Immediate inspection of latest hospital action</p>
+                    <p>✓ Rollback / Undo support for recent operations</p>
+                    <p>✓ Transparent operational audit trail</p>
+                </div>
+                <a href="{{ url_for('stack_demo') }}" class="btn btn-primary">Open Action Log →</a>
+            </div>
+
+            <!-- Queue Demo -->
+            <div class="demo-card">
+                <div class="demo-icon">🎫</div>
+                <h3>Live Patient Triage Line</h3>
+                <p><strong>Operations:</strong> Patient Check-in, Call to Doctor, View Line</p>
+                <p><strong>Scope:</strong> Outpatient Clinic Waiting Room</p>
+                <div class="demo-description">
+                    <p>✓ Fair first-come, first-served consultation flow</p>
+                    <p>✓ Quick check-in for arriving walk-in patients</p>
+                    <p>✓ Call next patient into consultation room</p>
+                    <p>✓ Prevents waiting room bottlenecks</p>
+                </div>
+                <a href="{{ url_for('queue_demo') }}" class="btn btn-primary">Open Waiting Line →</a>
+            </div>
+
+            <!-- Expression Handler Demo -->
+            <div class="demo-card">
+                <div class="demo-icon">✓</div>
+                <h3>Prescription Formula Validator</h3>
+                <p><strong>Scope:</strong> Medical Dosage & Bracket Verification</p>
+                <p><strong>Engine:</strong> Formula Syntax Analyzer</p>
+                <div class="demo-description">
+                    <p>✓ Validate dosage brackets & formula groupings</p>
+                    <p>✓ Support (), {}, [] brackets</p>
+                    <p>✓ Step-by-step validation trace</p>
+                    <p>✓ Prevent prescription dosage errors</p>
+                </div>
+                <a href="{{ url_for('expression_handler') }}" class="btn btn-primary">Explore →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Learning Points -->
+    <section class="learning">
+        <h2>💡 Key Clinical Systems Architecture</h2>
+        
+        <div class="learning-grid">
+            <div class="learning-card">
+                <h3>Dynamic Registers</h3>
+                <ul>
+                    <li>Dynamic capacity adjusting to patient load</li>
+                    <li>Instant insertion and deletion of patient charts</li>
+                    <li>Zero system downtime for updates</li>
+                    <li>High data integrity for clinical records</li>
+                </ul>
+            </div>
+            
+            <div class="learning-card">
+                <h3>Audit Log & Undo</h3>
+                <ul>
+                    <li>Complete administrative audit trail</li>
+                    <li>Instant undo for accidental cancellations</li>
+                    <li>Chronological shift-handover tracking</li>
+                    <li>Regulatory healthcare compliance</li>
+                </ul>
+            </div>
+            
+            <div class="learning-card">
+                <h3>Patient Calling Flow</h3>
+                <ul>
+                    <li>Fair, automated patient calling</li>
+                    <li>Triage queue bottleneck prevention</li>
+                    <li>Real-time waiting room dashboard</li>
+                    <li>Integrated nurse calling workflow</li>
+                </ul>
+            </div>
+            
+            <div class="learning-card">
+                <h3>Medication Safety</h3>
+                <ul>
+                    <li>Dosage formula syntax verification</li>
+                    <li>Pediatric calculation safeguarding</li>
+                    <li>Pharmaceutical compounding accuracy</li>
+                    <li>Immediate syntax error notification</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Implementation Info -->
+    <section class="implementation">
+        <h2>💻 Implementation Details</h2>
+        
+        <div class="implementation-content">
+            <h3>Custom Data Structure Implementation</h3>
+            <p>All data structures in this project are <strong>custom implementations</strong> using Python, not built-in lists or collections. This demonstrates true understanding of how these structures work internally.</p>
+            
+            <div class="implementation-grid">
+                <div class="impl-box">
+                    <h4>Node Class</h4>
+                    <p>Contains data and a reference to the next node</p>
+                    <code>class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None</code>
+                </div>
+                
+                <div class="impl-box">
+                    <h4>LinkedList Class</h4>
+                    <p>Manages nodes and implements insert, delete, traverse</p>
+                    <code>class LinkedList:
+    def __init__(self):
+        self.head = None
+    
+    def insert(self, data)
+    def delete(self, key)
+    def traverse()</code>
+                </div>
+                
+                <div class="impl-box">
+                    <h4>Stack Class</h4>
+                    <p>Uses LinkedList internally for LIFO operations</p>
+                    <code>class Stack:
+    def __init__(self):
+        self.items = LinkedList()
+    
+    def push(self, data)
+    def pop()
+    def peek()</code>
+                </div>
+                
+                <div class="impl-box">
+                    <h4>Queue Class</h4>
+                    <p>Uses LinkedList internally for FIFO operations</p>
+                    <code>class Queue:
+    def __init__(self):
+        self.items = LinkedList()
+    
+    def enqueue(self, data)
+    def dequeue()
+    def peek()</code>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.phase1-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.phase1-header {
+    text-align: center;
+    margin-bottom: 60px;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+}
+
+.phase1-header h1 {
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+
+.phase1-header p {
+    font-size: 1.1em;
+    opacity: 0.95;
+}
+
+/* Overview Section */
+.overview {
+    margin-bottom: 60px;
+    padding: 40px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+}
+
+.overview h2 {
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 1.5em;
+}
+
+.overview-content > p {
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.6;
+    font-size: 1.05em;
+}
+
+.key-concepts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.concept-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.concept-card h3 {
+    color: #667eea;
+    margin-bottom: 12px;
+}
+
+.concept-card p {
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Demonstrations Section */
+.demonstrations {
+    margin-bottom: 60px;
+}
+
+.demonstrations h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.demonstrations > p {
+    text-align: center;
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.demo-card {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.demo-card:hover {
+    transform: translateY(-5px);
+}
+
+.demo-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+.demo-card h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.demo-card p {
+    color: #666;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+}
+
+.demo-description {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.demo-description p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.demo-card .btn {
+    width: 100%;
+    margin-top: 15px;
+}
+
+/* Learning Section */
+.learning {
+    margin-bottom: 60px;
+    padding: 40px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    border-radius: 10px;
+}
+
+.learning h2 {
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.learning-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.learning-card {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.learning-card h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.learning-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.learning-card li {
+    color: #666;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.learning-card li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+    font-weight: bold;
+}
+
+/* Implementation Section */
+.implementation {
+    padding: 40px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+}
+
+.implementation h2 {
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.implementation-content > p {
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.implementation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.impl-box {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.impl-box h4 {
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.impl-box p {
+    color: #666;
+    margin-bottom: 12px;
+    font-size: 0.95em;
+}
+
+.impl-box code {
+    display: block;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    overflow-x: auto;
+    color: #333;
+    font-family: 'Courier New', monospace;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .phase1-header h1 {
+        font-size: 1.5em;
+    }
+
+    .demo-grid,
+    .learning-grid,
+    .implementation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

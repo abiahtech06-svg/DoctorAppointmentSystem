@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Waiting Line - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="demo-container">
+    <div class="demo-header queue-theme">
+        <h1>🎫 Live Patient Waiting Line & Calling System</h1>
+        <p>Fair, orderly patient check-in management and turn-based calling for doctor consultation rooms</p>
+    </div>
+
+    <div class="queue-content">
+        <!-- Queue Visualization -->
+        <section class="queue-visualization">
+            <h2>Current Waiting Room Status</h2>
+            
+            <div class="queue-display-area">
+                <div class="queue-info">
+                    <p><strong>Patients in Waiting Area:</strong> {{ waiting_patients|length }}</p>
+                    <p><strong>Status:</strong> {% if waiting_patients %}{{ waiting_patients|length }} patient(s) waiting in line{% else %}Waiting line is empty{% endif %}</p>
+                </div>
+
+                <div class="queue-visual">
+                    <div class="queue-box">
+                        <div class="queue-label">NEXT IN LINE (To be called next)</div>
+                        <div class="queue-items">
+                            {% if waiting_patients %}
+                                {% for patient in waiting_patients %}
+                                    <div class="queue-item">
+                                        <span class="queue-patient">
+                                            {% if patient.patient_name %}
+                                                👤 {{ patient.patient_name }} (ID: {{ patient.patient_id }})
+                                            {% else %}
+                                                👤 Patient {{ patient.patient_id }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% if not loop.last %}
+                                        <div class="queue-arrow">&rarr;</div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="queue-item empty">
+                                    <span class="queue-patient">Waiting Room is Empty</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="queue-label">LATEST ARRIVAL (End of Line)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Queue Operations -->
+        <section class="queue-operations">
+            <h2>Waiting Line Actions</h2>
+            
+            <div class="operations-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                <!-- Call Next Patient -->
+                <div class="operation-card" style="border-top: 4px solid #10b981;">
+                    <div class="operation-icon">📢</div>
+                    <h3>Call Next Patient into Clinic</h3>
+                    <p>Call the patient at the front of the line into the consultation room for their doctor examination:</p>
+                    <button class="btn btn-success" onclick="dequeueFromQueue()" {% if not waiting_patients %}disabled{% endif %} style="padding: 12px 20px; font-weight: 700; font-size: 1em;">
+                        📢 Call Next Patient
+                    </button>
+                    {% if not waiting_patients %}
+                        <p class="operation-note text-muted" style="margin-top: 8px;">No patients currently waiting</p>
+                    {% endif %}
+                </div>
+
+                <!-- Fast Check-in for Existing Registered Patient -->
+                <div class="operation-card" style="border-top: 4px solid #3b82f6;">
+                    <div class="operation-icon">🎫</div>
+                    <h3>Check In Registered Patient</h3>
+                    <p>Select an existing patient from hospital records to add to today's consultation queue:</p>
+                    <form method="POST" action="" id="quickCheckinForm" onsubmit="event.preventDefault(); const pid = document.getElementById('quick_patient_id').value; if(pid) window.location.href='/checkin-patient/' + pid;">
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <select id="quick_patient_id" class="form-control" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                                <option value="">-- Select Patient --</option>
+                                {% for p in all_patients %}
+                                    <option value="{{ p.patient_id }}">{{ p.patient_name }} (ID: #{{ p.patient_id }})</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-primary" style="padding: 10px 16px; font-weight: 600;">+ Check In</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Check-in Brand New Patient -->
+                <div class="operation-card" style="border-top: 4px solid #6366f1;">
+                    <div class="operation-icon">📝</div>
+                    <h3>New Walk-In Registration</h3>
+                    <p>Register a brand new walk-in patient at the reception desk and add them to the queue:</p>
+                    <div class="quick-links" style="margin-top: 10px;">
+                        <a href="{{ url_for('add_patient') }}" class="btn btn-primary" style="display: block; text-align: center; padding: 10px;">+ Register &amp; Triage</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practical Patient Flow Architecture Guide -->
+        <section class="concepts-section">
+            <h2>💡 Hospital Waiting Room & Patient Flow Architecture</h2>
+            <div class="concepts-grid">
+                <div class="concept-card">
+                    <h3>Fair First-Come Intake</h3>
+                    <p>Ensures every arriving patient is treated with dignity and called into physician offices in the exact sequence they checked in.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Reduced Waiting Times</h3>
+                    <p>Live visibility into waiting counts allows triage nurses and duty managers to balance clinic workloads dynamically.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Automated Calling System</h3>
+                    <p>Provides one-click calling for doctors and nurses, automatically advancing the waiting line and updating clinic screens.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Integrated Hospital Flow</h3>
+                    <p>Seamlessly transitions patients from check-in to consultation, diagnostic testing, and the pharmacy checkout.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.queue-theme {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.queue-theme h1 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+}
+
+.queue-theme p {
+    margin: 0;
+    opacity: 0.95;
+    font-size: 1.05em;
+}
+
+.queue-visualization, .queue-operations, .concepts-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.queue-visualization h2, .queue-operations h2, .concepts-section h2 {
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+.queue-display-area {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 25px;
+    align-items: center;
+}
+
+.queue-info {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.queue-info p {
+    margin: 8px 0;
+    color: #334155;
+    font-size: 0.95em;
+}
+
+.queue-visual {
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.queue-box {
+    border: 3px solid #10b981;
+    border-radius: 10px;
+    padding: 15px;
+    background: #f8fafc;
+    min-width: 100%;
+}
+
+.queue-label {
+    text-align: center;
+    color: #059669;
+    font-weight: bold;
+    font-size: 0.82em;
+    padding: 4px 0;
+    letter-spacing: 0.5px;
+}
+
+.queue-items {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 15px 0;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.queue-item {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 12px 18px;
+    border-radius: 8px;
+    color: #065f46;
+    font-weight: 600;
+    font-size: 0.9em;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.queue-item.empty {
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    color: #94a3b8;
+    width: 100%;
+    text-align: center;
+}
+
+.queue-arrow {
+    color: #10b981;
+    font-weight: bold;
+    font-size: 1.3em;
+}
+
+.operations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.operation-card {
+    background: #f8fafc;
+    padding: 24px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.operation-icon {
+    font-size: 2.2em;
+    margin-bottom: 12px;
+}
+
+.operation-card h3 {
+    margin: 0 0 10px 0;
+    color: #1e293b;
+    font-size: 1.15em;
+}
+
+.operation-card p {
+    color: #64748b;
+    font-size: 0.92em;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.quick-links {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 0.88em;
+}
+
+.concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.concept-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.concept-card h3 {
+    color: #059669;
+    margin-bottom: 8px;
+    font-size: 1.05em;
+}
+
+.concept-card p {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.92em;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .queue-display-area, .operations-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function dequeueFromQueue() {
+    if (confirm('Call the next patient into the consultation room?')) {
+        fetch('/api/queue/dequeue', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const patientName = data.patient.patient_name || 'Patient ' + data.patient.patient_id;
+                alert('Called into Consultation Room: ' + patientName);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+</script>
+{% endblock %}

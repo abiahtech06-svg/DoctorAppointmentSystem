@@ -1,0 +1,526 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical Operations Dashboard - Doctor Appointment Booking and Management System{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Header -->
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+        <div>
+            <h1 style="margin: 0; font-size: 1.8em; color: #1e293b;">🏥 Hospital Operations Dashboard</h1>
+            <p style="margin: 4px 0 0; color: #64748b; font-size: 0.95em;">
+                Logged in as <strong>{{ session.get('full_name') }}</strong> (<span class="role-pill">{{ session.get('role') }}</span>)
+            </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="{{ url_for('add_appointment') }}" class="btn btn-primary" style="padding: 10px 18px; font-weight: 600;">+ Book Appointment</a>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <section class="stats-section" style="margin-bottom: 30px;">
+        <div class="stats-grid">
+            <a href="{{ url_for('doctors_list') }}" class="stat-card doctors" style="text-decoration: none;">
+                <div class="stat-icon">👨‍⚕️</div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ stats.total_doctors }}</div>
+                    <div class="stat-label">On-Duty Specialists</div>
+                    <div class="stat-sub">Across 5 hospital divisions</div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('patients_list') }}" class="stat-card patients" style="text-decoration: none;">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ stats.total_patients }}</div>
+                    <div class="stat-label">Registered Patients</div>
+                    <div class="stat-sub">Intake & medical records</div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('appointments_list') }}" class="stat-card appointments" style="text-decoration: none;">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ stats.total_appointments }}</div>
+                    <div class="stat-label">Total Appointments</div>
+                    <div class="stat-sub">
+                        <span style="color: #2563eb; font-weight: 600;">{{ stats.booked_appointments }} Booked</span> &bull; 
+                        <span style="color: #16a34a; font-weight: 600;">{{ stats.completed_appointments }} Completed</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('queue_demo') }}" class="stat-card queue-stat" style="text-decoration: none; border-left: 5px solid #10b981;">
+                <div class="stat-icon">🎫</div>
+                <div class="stat-content">
+                    <div class="stat-value" style="color: #059669;">{{ stats.waiting_count }}</div>
+                    <div class="stat-label">In Waiting Room</div>
+                    <div class="stat-sub" style="color: #059669; font-weight: 600;">
+                        {% if stats.waiting_count > 0 %}Live triage queue active{% else %}Queue is clear{% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Quick Actions Bar -->
+    <section class="quick-actions" style="margin-bottom: 35px;">
+        <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 1.1em; color: #334155;">⚡ Immediate Clinical Workflows</h3>
+                <span style="font-size: 0.85em; color: #64748b;">One-click shortcuts for desk staff</span>
+            </div>
+            <div class="actions-grid" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));">
+                <a href="{{ url_for('add_appointment') }}" class="action-btn">
+                    <span class="action-icon">📝</span>
+                    <span style="font-weight: 600;">Book Visit</span>
+                    <small style="color: #64748b; font-size: 0.8em;">Schedule consultation</small>
+                </a>
+                
+                <a href="{{ url_for('add_patient') }}" class="action-btn">
+                    <span class="action-icon">➕</span>
+                    <span style="font-weight: 600;">Check-In Walk-In</span>
+                    <small style="color: #64748b; font-size: 0.8em;">Register & triage</small>
+                </a>
+                
+                {% if session.get('role') == 'Admin' %}
+                    <a href="{{ url_for('add_doctor') }}" class="action-btn">
+                        <span class="action-icon">👨‍⚕️</span>
+                        <span style="font-weight: 600;">Add Specialist</span>
+                        <small style="color: #64748b; font-size: 0.8em;">Register new doctor</small>
+                    </a>
+                {% endif %}
+
+                <a href="{{ url_for('queue_demo') }}" class="action-btn" style="border-color: #a7f3d0; background: #f0fdf4;">
+                    <span class="action-icon">📢</span>
+                    <span style="font-weight: 600; color: #065f46;">Call Waiting Room</span>
+                    <small style="color: #047857; font-size: 0.8em;">Advance triage queue</small>
+                </a>
+
+                <a href="{{ url_for('graph_demo') }}" class="action-btn">
+                    <span class="action-icon">🗺️</span>
+                    <span style="font-weight: 600;">Indoor Wayfinding</span>
+                    <small style="color: #64748b; font-size: 0.8em;">Corridor route finder</small>
+                </a>
+
+                <a href="{{ url_for('phase4') }}" class="action-btn">
+                    <span class="action-icon">⚡</span>
+                    <span style="font-weight: 600;">Clinic Planner</span>
+                    <small style="color: #64748b; font-size: 0.8em;">Capacity & schedule</small>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Two-Column Operational Command Center -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 25px; margin-bottom: 40px;">
+        <!-- Left Column: Patient Waiting Queue & Audit History -->
+        <div style="display: flex; flex-direction: column; gap: 25px;">
+            <!-- Live Triage Waiting Room Board -->
+            <div class="dashboard-panel" style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="margin: 0; color: #1e293b; font-size: 1.2em;">🎫 Live Patient Waiting Queue</h3>
+                        <p style="margin: 2px 0 0; color: #64748b; font-size: 0.85em;">First-Come, First-Served Outpatient Consultation Line</p>
+                    </div>
+                    <a href="{{ url_for('queue_demo') }}" class="btn btn-secondary btn-small" style="font-size: 0.8em;">Full Board &rarr;</a>
+                </div>
+
+                {% if waiting_patients %}
+                    <div style="background: #f8fafc; border-radius: 8px; padding: 14px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.5px; color: #0284c7; font-weight: 700;">NEXT PATIENT TO BE EXAMINED</span>
+                                <div style="font-size: 1.15em; font-weight: 700; color: #0f172a; margin-top: 4px;">
+                                    👤 {{ waiting_patients[0].patient_name }} 
+                                    <span style="font-size: 0.8em; font-weight: normal; color: #64748b;">(ID: #{{ waiting_patients[0].patient_id }})</span>
+                                </div>
+                            </div>
+                            <button onclick="callNextPatient()" class="btn btn-primary" style="background: #10b981; border: none; padding: 8px 14px; font-weight: 600; font-size: 0.85em;">
+                                📢 Call In Now
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 0.85em; font-weight: 600; color: #475569; margin-bottom: 8px;">Orderly Waiting Line ({{ waiting_patients|length }} in queue):</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto;">
+                        {% for p in waiting_patients %}
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.9em;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="background: #e0f2fe; color: #0369a1; font-weight: 700; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75em;">{{ loop.index }}</span>
+                                    <strong>{{ p.patient_name }}</strong>
+                                </div>
+                                <span style="color: #64748b; font-size: 0.85em;">ID: #{{ p.patient_id }} &bull; {{ p.gender or 'Patient' }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 25px 15px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                        <span style="font-size: 2em;">🛋️</span>
+                        <p style="margin: 8px 0 12px; color: #64748b; font-size: 0.9em;">The outpatient waiting room is currently empty.</p>
+                        <a href="{{ url_for('patients_list') }}" class="btn btn-secondary btn-small">Check In a Patient from Records</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Operational Activity & Audit Trail (Stack) -->
+            <div class="dashboard-panel" style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div>
+                        <h3 style="margin: 0; color: #1e293b; font-size: 1.15em;">📚 Recent Operational Activity Log</h3>
+                        <p style="margin: 2px 0 0; color: #64748b; font-size: 0.85em;">Live Audit Stack & Desk Operations</p>
+                    </div>
+                    <a href="{{ url_for('stack_demo') }}" class="btn btn-secondary btn-small" style="font-size: 0.8em;">Audit Stack &rarr;</a>
+                </div>
+
+                {% if recent_actions %}
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        {% for act in recent_actions %}
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #6366f1; font-size: 0.88em; color: #334155;">
+                                <span style="color: #6366f1; font-weight: 700;">⏱️</span>
+                                <span>{{ act }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: #64748b; font-size: 0.9em; margin: 0;">No desk actions recorded yet today.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column: Recent Appointments & Doctor Roster -->
+        <div style="display: flex; flex-direction: column; gap: 25px;">
+            <!-- Today's Appointments Table & Wayfinding -->
+            <div class="dashboard-panel" style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="margin: 0; color: #1e293b; font-size: 1.2em;">📅 Consultation Schedule Overview</h3>
+                        <p style="margin: 2px 0 0; color: #64748b; font-size: 0.85em;">Recent Bookings & Turn-by-Turn Wayfinding</p>
+                    </div>
+                    <a href="{{ url_for('appointments_list') }}" class="btn btn-secondary btn-small" style="font-size: 0.8em;">All Appointments &rarr;</a>
+                </div>
+
+                {% if recent_appointments %}
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for appt in recent_appointments %}
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <strong>#{{ appt.appointment_id }} - {{ appt.patient_name }}</strong>
+                                        <span class="status-badge {% if appt.status == 'Booked' %}status-booked{% elif appt.status == 'Cancelled' %}status-cancelled{% else %}status-completed{% endif %}" style="font-size: 0.75em; padding: 2px 8px;">
+                                            {{ appt.status }}
+                                        </span>
+                                    </div>
+                                    <div style="color: #64748b; font-size: 0.82em; margin-top: 3px;">
+                                        👨‍⚕️ {{ appt.doctor_name }} &bull; 🗓️ {{ appt.appointment_date }} at {{ appt.appointment_time }}
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <a href="{{ url_for('appointments_list') }}" class="btn btn-secondary btn-small" style="font-size: 0.8em; padding: 4px 8px;">
+                                        📍 Route
+                                    </a>
+                                    {% if appt.status == 'Booked' %}
+                                        <a href="{{ url_for('complete_appointment', appointment_id=appt.appointment_id) }}" class="btn btn-success btn-small" style="font-size: 0.8em; padding: 4px 8px; background: #10b981; color: white;">
+                                            ✓ Complete
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 25px 15px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                        <p style="margin: 0 0 10px; color: #64748b; font-size: 0.9em;">No appointments scheduled yet.</p>
+                        <a href="{{ url_for('add_appointment') }}" class="btn btn-primary btn-small">+ Book First Appointment</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- On-Duty Doctors Preview -->
+            <div class="dashboard-panel" style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div>
+                        <h3 style="margin: 0; color: #1e293b; font-size: 1.15em;">👨‍⚕️ Available Medical Specialists</h3>
+                        <p style="margin: 2px 0 0; color: #64748b; font-size: 0.85em;">Department Divisions & Consultation Hours</p>
+                    </div>
+                    <a href="{{ url_for('doctors_list') }}" class="btn btn-secondary btn-small" style="font-size: 0.8em;">View Roster &rarr;</a>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    {% for doc in doctors %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.9em;">
+                            <div>
+                                <div style="font-weight: 700; color: #1e293b;">{{ doc.doctor_name }}</div>
+                                <div style="color: #2563eb; font-size: 0.82em; font-weight: 600;">{{ doc.specialization }} (ID: {{ doc.doctor_id }})</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <a href="{{ url_for('add_appointment', doctor_id=doc.doctor_id) }}" class="btn btn-primary btn-small" style="font-size: 0.8em; padding: 4px 10px;">
+                                    Book Visit
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hospital Clinical Systems Hub -->
+    <section class="phase-curriculum-section" style="margin-bottom: 40px;">
+        <h2 style="color: #1e293b; font-size: 1.35em; margin-bottom: 20px;">🏥 Hospital Operational Engines & Clinical Systems</h2>
+        <div class="phase-cards-container">
+            <!-- Patient Flow Card -->
+            <div class="phase-hero-card phase1-theme">
+                <div class="phase-hero-badge">Patient Intake</div>
+                <h3>👥 Outpatient Triage & Activity Flow</h3>
+                <p>Manage patient arrivals in fair first-come, first-served order, track live appointment bookings and cancellations, and audit operational activity.</p>
+                <div class="phase-hero-links">
+                    <a href="{{ url_for('queue_demo') }}" class="btn btn-primary">Live Waiting Queue</a>
+                    <a href="{{ url_for('stack_demo') }}" class="btn btn-secondary">Recent Actions</a>
+                    <a href="{{ url_for('patients_list') }}" class="btn btn-secondary">Patient Records</a>
+                </div>
+            </div>
+
+            <!-- Hospital Directory & Navigation Card -->
+            <div class="phase-hero-card phase2-theme">
+                <div class="phase-hero-badge">Wayfinding</div>
+                <h3>🗺️ Hospital Corridor Map & Directory</h3>
+                <p>Find the shortest walking route between any hospital departments, search medical specialists instantly by staff ID, and view clinical division hierarchy.</p>
+                <div class="phase-hero-links">
+                    <a href="{{ url_for('graph_demo') }}" class="btn btn-success-hero">Hospital Route Guide</a>
+                    <a href="{{ url_for('bst_demo') }}" class="btn btn-secondary">Instant Doctor Search</a>
+                    <a href="{{ url_for('tree_demo') }}" class="btn btn-secondary">Department Directory</a>
+                </div>
+            </div>
+
+            <!-- Hospital Search & Schedule Organizer Card -->
+            <div class="phase-hero-card phase3-theme">
+                <div class="phase-hero-badge">Search & Sorter</div>
+                <h3>⚡ Fast Search & Schedule Organizer</h3>
+                <p>Pull up patient files and medical staff instantly at reception, organize consultation calendars fairly without bumping appointments, and sort specialist rosters by department.</p>
+                <div class="phase-hero-links">
+                    <a href="{{ url_for('phase3') }}" class="btn btn-warning-hero">Search & Sorter Hub</a>
+                    <a href="{{ url_for('search_demo') }}" class="btn btn-secondary">Express Search</a>
+                    <a href="{{ url_for('sort_demo') }}" class="btn btn-secondary">Schedule Organizer</a>
+                </div>
+            </div>
+
+            <!-- Algorithmic Clinic Planning Card -->
+            <div class="phase-hero-card phase4-theme" style="border-top: 5px solid #0f766e;">
+                <div class="phase-hero-badge">Capacity Planner</div>
+                <h3>🩺 Clinic Optimization & Case Allocation</h3>
+                <p>Fit non-overlapping appointments into single rooms, prioritize urgent clinical cases within daily capacity, and auto-match doctor specializations without conflicts.</p>
+                <div class="phase-hero-links">
+                    <a href="{{ url_for('phase4') }}" class="btn btn-primary" style="background: #0f766e;">Open Clinic Planner</a>
+                    <a href="{{ url_for('expression_handler') }}" class="btn btn-secondary">Dosage Validator</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+async function callNextPatient() {
+    try {
+        const response = await fetch('/api/queue/dequeue', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        const data = await response.json();
+        if (data.success && data.patient) {
+            alert(`📢 Called next patient into examination room: ${data.patient.patient_name || ('Patient #' + data.patient.patient_id)}`);
+            window.location.reload();
+        } else {
+            alert(data.message || 'No patients waiting in queue.');
+        }
+    } catch (e) {
+        alert('Error calling next patient.');
+    }
+}
+</script>
+
+<style>
+.role-pill {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.live-pulse-badge {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.4);
+    animation: pulseAnimation 2s infinite;
+}
+
+@keyframes pulseAnimation {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.stat-sub {
+    font-size: 0.8em;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.phase-curriculum-section {
+    margin-bottom: 50px;
+}
+
+.phase-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.phase-hero-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.phase1-theme { border-top: 5px solid #6366f1; }
+.phase2-theme { border-top: 5px solid #10b981; }
+.phase3-theme { border-top: 5px solid #f59e0b; }
+.phase4-theme { border-top: 5px solid #0f766e; }
+
+.phase-hero-badge {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 700;
+}
+
+.phase-hero-card h3 {
+    margin-bottom: 10px;
+    color: #1e293b;
+    font-size: 1.15em;
+}
+
+.phase-hero-card p {
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+.phase-hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-success-hero {
+    background: #10b981;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.btn-warning-hero {
+    background: #f59e0b;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 22px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-left: 5px solid #6366f1;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+.stat-card.patients { border-left-color: #ec4899; }
+.stat-card.appointments { border-left-color: #3b82f6; }
+
+.stat-icon { font-size: 2.2em; }
+.stat-value { font-size: 1.8em; font-weight: bold; color: #1e293b; line-height: 1.1; }
+.stat-label { color: #475569; font-size: 0.9em; font-weight: 600; margin-top: 2px; }
+
+.actions-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.action-btn {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 10px;
+    text-align: center;
+    text-decoration: none;
+    color: #334155;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.action-btn:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+    transform: translateY(-2px);
+}
+
+.action-icon { font-size: 1.6em; }
+</style>
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Patients - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>👥 Patients</h1>
+        <a href="{{ url_for('add_patient') }}" class="btn btn-primary">+ Register Patient</a>
+    </div>
+
+    <!-- Hospital Sorting & Searching Operations Panel -->
+    <div class="patient-filter-bar" style="background: white; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+        <form method="GET" action="{{ url_for('patients_list') }}" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+            <!-- Search Inputs -->
+            <div style="flex: 2; min-width: 240px;">
+                <label style="font-size: 0.85em; font-weight: 700; color: #475569; display: block; margin-bottom: 5px;">🔍 Search Patient Records:</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" name="search_query" value="{{ search_query or '' }}" placeholder="Search Patient ID or Name..." class="form-control" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <select name="search_alg" class="form-control" style="width: 170px; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <option value="linear" {% if search_alg == 'linear' %}selected{% endif %}>Flexible Search (Name/Text)</option>
+                        <option value="binary" {% if search_alg == 'binary' %}selected{% endif %}>Express Search (Patient ID)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Sort Inputs -->
+            <div style="flex: 2; min-width: 240px;">
+                <label style="font-size: 0.85em; font-weight: 700; color: #475569; display: block; margin-bottom: 5px;">📊 Organize Patient Files:</label>
+                <div style="display: flex; gap: 8px;">
+                    <select name="sort_by" class="form-control" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <option value="id" {% if sort_by == 'id' %}selected{% endif %}>Sort by Patient File ID</option>
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Sort by Patient Name</option>
+                        <option value="age" {% if sort_by == 'age' %}selected{% endif %}>Sort by Patient Age</option>
+                    </select>
+                    <select name="algorithm" class="form-control" style="width: 170px; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <option value="merge" {% if sort_alg == 'merge' %}selected{% endif %}>Priority Order (Fair)</option>
+                        <option value="quick" {% if sort_alg == 'quick' %}selected{% endif %}>Fast File Sorter</option>
+                        <option value="insertion" {% if sort_alg == 'insertion' %}selected{% endif %}>Walk-In Arrival Order</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-primary" style="padding: 8px 16px;">Apply Filter</button>
+                <a href="{{ url_for('patients_list') }}" class="btn btn-secondary" style="padding: 8px 14px; text-decoration: none; border-radius: 6px;">Reset</a>
+            </div>
+        </form>
+
+        <!-- Practical Feedback Badge -->
+        {% if search_metrics %}
+            <div style="margin-top: 14px; padding: 10px 14px; background: #eff6ff; border-radius: 6px; border-left: 4px solid #3b82f6; font-size: 0.9em; color: #1e40af;">
+                ⚡ <strong>Patient Lookup:</strong> 
+                {% if search_metrics.found %}
+                    Found patient file in <strong>{{ search_metrics.comparisons }} record check(s)</strong> ({{ search_metrics.execution_time_ms }} ms).
+                {% else %}
+                    Patient file not located after checking {{ search_metrics.comparisons }} records.
+                {% endif %}
+            </div>
+        {% elif sort_metrics %}
+            <div style="margin-top: 14px; padding: 10px 14px; background: #f0fdf4; border-radius: 6px; border-left: 4px solid #16a34a; font-size: 0.9em; color: #166534;">
+                📊 <strong>Register Organizer:</strong> Sequenced patient register in {{ sort_metrics.execution_time_ms }} ms ({{ sort_metrics.comparisons }} file checks).
+            </div>
+        {% endif %}
+    </div>
+
+    {% if patients %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                        <tr>
+                            <td><strong>{{ patient.patient_id }}</strong></td>
+                            <td>{{ patient.patient_name }}</td>
+                            <td>{{ patient.age }}</td>
+                            <td>{{ patient.gender }}</td>
+                            <td>{{ patient.phone }}</td>
+                            <td>{{ patient.email }}</td>
+                            <td>
+                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                    <a href="{{ url_for('checkin_patient', patient_id=patient.patient_id) }}" class="btn btn-success btn-small" style="background: #10b981; color: white;" title="Send to waiting room queue">
+                                        🎫 Check-In
+                                    </a>
+                                    <a href="{{ url_for('add_appointment', patient_id=patient.patient_id) }}" class="btn btn-primary btn-small" title="Schedule appointment">
+                                        📅 Book Visit
+                                    </a>
+                                    <button class="btn btn-danger btn-small" style="opacity: 0.85;" onclick="deletePatient({{ patient.patient_id }})">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No patients registered yet.</p>
+            <a href="{{ url_for('add_patient') }}" class="btn btn-primary">Register First Patient</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    color: #333;
+    margin: 0;
+}
+
+.table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background-color: #f093fb;
+    color: white;
+}
+
+.data-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.data-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85em;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .data-table {
+        font-size: 0.9em;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 10px;
+    }
+}
+</style>
+
+<script>
+function deletePatient(patientId) {
+    if (confirm('Are you sure you want to delete this patient?')) {
+        window.location.href = '/patients/' + patientId + '/delete';
+    }
+}
+</script>
+{% endblock %}

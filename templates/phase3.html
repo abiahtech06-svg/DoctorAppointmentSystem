@@ -1,0 +1,2059 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Search Directory & Schedule Organizer{% endblock %}
+
+{% block content %}
+<div class="phase3-container">
+    <!-- Header Banner -->
+    <div class="phase3-header">
+        <div class="header-badge">Clinical Operations & Patient Flow System</div>
+        <h1>🏥 HOSPITAL SEARCH DIRECTORY, ROSTER SORTING & SCHEDULE ORGANIZER</h1>
+        <p>Instant Patient & Staff File Retrieval, Fair Chronological Appointment Sequencing, and Dynamic Department Roster Management</p>
+        
+        <div class="header-stats">
+            <div class="stat-pill">
+                <span class="stat-icon">🩺</span>
+                <span class="stat-label">Active Doctors:</span>
+                <span class="stat-value">{{ total_doctors }}</span>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-icon">👥</span>
+                <span class="stat-label">Registered Patients:</span>
+                <span class="stat-value">{{ total_patients }}</span>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-icon">📅</span>
+                <span class="stat-label">Scheduled Consultations:</span>
+                <span class="stat-value">{{ total_appointments }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Section with Logical 2-Group Layout -->
+    <section class="overview-section">
+        <div class="section-heading">
+            <span class="section-tag">Clinical Architecture</span>
+            <h2>Hospital Operational Engines & Capabilities</h2>
+            <p>Every operational desk—from reception check-in to operating theater coordination—relies on tailored search and sorting tools designed for specific clinical workflows.</p>
+        </div>
+
+        <!-- Group 1: Search & Retrieval -->
+        <div class="engine-group">
+            <div class="group-title">
+                <span class="group-icon">🔍</span>
+                <div>
+                    <h3>Patient & Staff File Retrieval Systems</h3>
+                    <p>Designed for check-in desks, emergency triage, and clinical record lookups</p>
+                </div>
+            </div>
+            <div class="cards-grid grid-2">
+                <div class="tool-card search-theme">
+                    <div class="tool-header">
+                        <div class="tool-badge">Intake Desks</div>
+                        <span class="tool-icon">🔍</span>
+                    </div>
+                    <h4>Flexible Medical Record Search</h4>
+                    <p class="tool-desc">Universal text search across doctor specialties, patient full names, and partial notes. Scans unsorted daily intake registers without requiring exact badge IDs.</p>
+                    <div class="tool-highlights">
+                        <div class="highlight-item"><span class="check">✓</span> Handles partial names (e.g., "Patel" or "Cardio")</div>
+                        <div class="highlight-item"><span class="check">✓</span> Works instantly on unsorted walk-in registers</div>
+                        <div class="highlight-item"><span class="check">✓</span> Finds all matching records across departments</div>
+                    </div>
+                    <div class="tool-action">
+                        <button class="btn-tool-test" onclick="presetSearch('doctors', 'name', 'Sarah', 'linear')">Quick Test: Search "Sarah" ⚡</button>
+                    </div>
+                </div>
+
+                <div class="tool-card search-theme">
+                    <div class="tool-header">
+                        <div class="tool-badge badge-fast">Emergency Intake</div>
+                        <span class="tool-icon">⚡</span>
+                    </div>
+                    <h4>Express Staff & Patient ID Lookup</h4>
+                    <p class="tool-desc">High-speed bisection lookup for pre-sorted hospital registers. Divides the remaining search space in half at each step, locating patient files or staff records in just 1 to 3 instant checks.</p>
+                    <div class="tool-highlights">
+                        <div class="highlight-item"><span class="check">✓</span> Direct Staff Badge and Patient ID retrieval</div>
+                        <div class="highlight-item"><span class="check">✓</span> Cuts search space by 50% at every single check</div>
+                        <div class="highlight-item"><span class="check">✓</span> Critical for emergency room instant patient pull-up</div>
+                    </div>
+                    <div class="tool-action">
+                        <button class="btn-tool-test" onclick="presetSearch('doctors', 'id', '101', 'binary')">Quick Test: Lookup Badge #101 ⚡</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group 2: Sorting & Scheduling -->
+        <div class="engine-group">
+            <div class="group-title">
+                <span class="group-icon">📊</span>
+                <div>
+                    <h3>Schedule Organization & Roster Management Systems</h3>
+                    <p>Engineered for consultation sequencing, departmental rosters, and walk-in clinic integration</p>
+                </div>
+            </div>
+            <div class="cards-grid grid-3">
+                <div class="tool-card sort-theme">
+                    <div class="tool-header">
+                        <div class="tool-badge badge-fair">Guaranteed Fair Order</div>
+                        <span class="tool-icon">📅</span>
+                    </div>
+                    <h4>Chronological Schedule Organizer</h4>
+                    <p class="tool-desc">Sequences daily consultation calendars chronologically while strictly preserving original arrival order. Patients booked for the same consultation hour never lose their booking precedence.</p>
+                    <div class="tool-highlights">
+                        <div class="highlight-item"><span class="check">✓</span> Non-displacing fair appointment order</div>
+                        <div class="highlight-item"><span class="check">✓</span> Dependable throughput regardless of schedule size</div>
+                        <div class="highlight-item"><span class="check">✓</span> Recommended for daily hospital booking sheets</div>
+                    </div>
+                    <div class="tool-action">
+                        <button class="btn-tool-test" onclick="presetSort('appointments', 'date', 'merge')">Quick Test: Fair Schedule Sort ⚡</button>
+                    </div>
+                </div>
+
+                <div class="tool-card sort-theme">
+                    <div class="tool-header">
+                        <div class="tool-badge badge-speed">High Efficiency</div>
+                        <span class="tool-icon">🚀</span>
+                    </div>
+                    <h4>Fast Division Roster Sorter</h4>
+                    <p class="tool-desc">Reorganizes and categorizes extensive hospital medical staff rosters by division, clinic wing, or doctor name in-place with minimal memory consumption.</p>
+                    <div class="tool-highlights">
+                        <div class="highlight-item"><span class="check">✓</span> Ultra-fast in-place directory partitioning</div>
+                        <div class="highlight-item"><span class="check">✓</span> Zero auxiliary memory overhead</div>
+                        <div class="highlight-item"><span class="check">✓</span> Ideal for alphabetical staff catalogs & rosters</div>
+                    </div>
+                    <div class="tool-action">
+                        <button class="btn-tool-test" onclick="presetSort('doctors', 'name', 'quick')">Quick Test: Fast Doctor Sort ⚡</button>
+                    </div>
+                </div>
+
+                <div class="tool-card sort-theme">
+                    <div class="tool-header">
+                        <div class="tool-badge badge-walkin">Intake Desk</div>
+                        <span class="tool-icon">🚶</span>
+                    </div>
+                    <h4>Walk-In Arrival Desk Sorter</h4>
+                    <p class="tool-desc">Seamlessly slides arriving walk-in patients into an already organized morning clinic schedule with minimal record shifts. Fastest method for nearly-ordered daily records.</p>
+                    <div class="tool-highlights">
+                        <div class="highlight-item"><span class="check">✓</span> Near-zero overhead for nearly sorted queues</div>
+                        <div class="highlight-item"><span class="check">✓</span> Perfect for adding arriving walk-in patients</div>
+                        <div class="highlight-item"><span class="check">✓</span> Preserves existing bookings with minimal moves</div>
+                    </div>
+                    <div class="tool-action">
+                        <button class="btn-tool-test" onclick="presetSort('patients', 'id', 'insertion')">Quick Test: Walk-In Sort ⚡</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE FUNCTIONAL OPERATIONAL CONSOLE -->
+    <section class="live-console-section" id="live-console">
+        <div class="console-card">
+            <div class="console-header">
+                <div class="console-title-area">
+                    <span class="live-indicator"><span class="live-pulse"></span> LIVE OPERATIONAL CONSOLE</span>
+                    <h2>Execute Live Hospital Operations</h2>
+                    <p>Run real-time searches and reorder actual hospital databases directly from this console.</p>
+                </div>
+                
+                <!-- Mode Switcher Tabs -->
+                <div class="console-tabs">
+                    <button class="console-tab active" id="tab-search-btn" onclick="switchConsoleTab('search')">
+                        <span class="tab-icon">🔍</span> Live Record Search
+                    </button>
+                    <button class="console-tab" id="tab-sort-btn" onclick="switchConsoleTab('sort')">
+                        <span class="tab-icon">📊</span> Live Roster & Schedule Sorter
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: LIVE SEARCH -->
+            <div class="console-tab-content active" id="console-tab-search">
+                <form id="liveSearchForm" onsubmit="executeLiveSearch(event)">
+                    <div class="console-form-grid">
+                        <div class="form-group">
+                            <label for="searchDataset">Hospital Register</label>
+                            <select id="searchDataset" onchange="updateSearchFields()">
+                                <option value="doctors" selected>👨‍⚕️ Doctors Directory ({{ total_doctors }} records)</option>
+                                <option value="patients">👥 Patients Register ({{ total_patients }} records)</option>
+                                <option value="appointments">📅 Appointments Log ({{ total_appointments }} records)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="searchBy">Search Field</label>
+                            <select id="searchBy">
+                                <option value="id" selected>Staff / Badge ID</option>
+                                <option value="name">Full Name</option>
+                                <option value="specialization">Medical Specialty</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="searchAlgorithm">Search Tool</label>
+                            <select id="searchAlgorithm">
+                                <option value="compare" selected>⚡ Compare Both (Sequential vs Bisection)</option>
+                                <option value="linear">🔍 Flexible Record Scan (Sequential)</option>
+                                <option value="binary">⚡ Express ID Direct Lookup (Bisection)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="searchTarget">Target Value</label>
+                            <div class="input-with-action">
+                                <input type="text" id="searchTarget" placeholder="e.g. 101, Sarah, or Cardiology" value="101" required>
+                                <button type="submit" class="btn-console-submit" id="searchSubmitBtn">
+                                    <span>Execute Search</span> 🔍
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Suggestion Pills -->
+                    <div class="quick-pills">
+                        <span class="quick-pills-label">Quick Suggestions:</span>
+                        <button type="button" class="pill-btn" onclick="quickFillSearch('doctors', 'id', '101', 'compare')">Badge #101</button>
+                        <button type="button" class="pill-btn" onclick="quickFillSearch('doctors', 'name', 'Sarah', 'compare')">Dr. Sarah</button>
+                        <button type="button" class="pill-btn" onclick="quickFillSearch('doctors', 'specialization', 'Cardiology', 'linear')">Cardiology</button>
+                        <button type="button" class="pill-btn" onclick="quickFillSearch('patients', 'id', '1', 'compare')">Patient #1</button>
+                        <button type="button" class="pill-btn" onclick="quickFillSearch('appointments', 'id', '1', 'compare')">Appointment #1</button>
+                    </div>
+                </form>
+
+                <!-- Search Results Output -->
+                <div class="console-output" id="searchOutput" style="display: none;">
+                    <div class="output-header">
+                        <h4>Live Search Operational Results</h4>
+                        <span class="execution-badge" id="searchExecBadge">Completed</span>
+                    </div>
+
+                    <div class="metrics-row" id="searchMetricsRow">
+                        <!-- Dynamic Metric Cards Inserted Here -->
+                    </div>
+
+                    <div class="results-layout">
+                        <!-- Left: Record Details -->
+                        <div class="result-details-card" id="searchResultCard">
+                            <!-- Injected by JS -->
+                        </div>
+
+                        <!-- Right: Inspection Steps / Path -->
+                        <div class="result-steps-card">
+                            <div class="steps-card-header">
+                                <h5>Inspection Log & Comparison Trace</h5>
+                                <span class="steps-count" id="searchStepsCount">0 checks</span>
+                            </div>
+                            <div class="steps-list" id="searchStepsList">
+                                <!-- Injected by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: LIVE SORT -->
+            <div class="console-tab-content" id="console-tab-sort">
+                <form id="liveSortForm" onsubmit="executeLiveSort(event)">
+                    <div class="console-form-grid">
+                        <div class="form-group">
+                            <label for="sortDataset">Hospital Register</label>
+                            <select id="sortDataset" onchange="updateSortFields()">
+                                <option value="doctors" selected>👨‍⚕️ Doctors Directory ({{ total_doctors }} records)</option>
+                                <option value="patients">👥 Patients Register ({{ total_patients }} records)</option>
+                                <option value="appointments">📅 Appointments Log ({{ total_appointments }} records)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sortBy">Sort Criterion</label>
+                            <select id="sortBy">
+                                <option value="name" selected>Doctor Name (Alphabetical)</option>
+                                <option value="id">Staff / Badge ID</option>
+                                <option value="specialization">Medical Specialty</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sortAlgorithm">Sorting Tool</label>
+                            <select id="sortAlgorithm">
+                                <option value="compare" selected>🏆 Compare All 3 Sorters (Head-to-Head)</option>
+                                <option value="merge">📅 Chronological Schedule Organizer (Merge)</option>
+                                <option value="quick">🚀 Fast Division Roster Sorter (Quick)</option>
+                                <option value="insertion">🚶 Walk-In Arrival Desk Sorter (Insertion)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sortOrder">Sequence Direction</label>
+                            <div class="input-with-action">
+                                <select id="sortOrder">
+                                    <option value="asc" selected>Ascending (A → Z, 1 → 9)</option>
+                                    <option value="desc">Descending (Z → A, 9 → 1)</option>
+                                </select>
+                                <button type="submit" class="btn-console-submit" id="sortSubmitBtn">
+                                    <span>Sort Records</span> ⚡
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Suggestion Pills for Sorting -->
+                    <div class="quick-pills">
+                        <span class="quick-pills-label">Quick Presets:</span>
+                        <button type="button" class="pill-btn" onclick="quickFillSort('doctors', 'name', 'compare', 'asc')">Doctors by Name (All 3 Sorters)</button>
+                        <button type="button" class="pill-btn" onclick="quickFillSort('doctors', 'specialization', 'quick', 'asc')">Doctors by Specialty (Fast Quick)</button>
+                        <button type="button" class="pill-btn" onclick="quickFillSort('appointments', 'date', 'merge', 'asc')">Appointments by Date (Fair Merge)</button>
+                        <button type="button" class="pill-btn" onclick="quickFillSort('patients', 'name', 'compare', 'asc')">Patients by Name</button>
+                    </div>
+                </form>
+
+                <!-- Sort Results Output -->
+                <div class="console-output" id="sortOutput" style="display: none;">
+                    <div class="output-header">
+                        <h4>Live Sorter Benchmark & Operational Comparison</h4>
+                        <span class="execution-badge" id="sortExecBadge">Completed</span>
+                    </div>
+
+                    <!-- Multi-algorithm comparison cards -->
+                    <div class="metrics-row" id="sortMetricsRow">
+                        <!-- Injected by JS -->
+                    </div>
+
+                    <!-- Sorted Records Table Preview -->
+                    <div class="sorted-preview-card">
+                        <div class="preview-header">
+                            <h5>Live Reordered Dataset Preview</h5>
+                            <span class="preview-info" id="sortPreviewInfo">Displaying organized records</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="preview-table" id="sortPreviewTable">
+                                <thead>
+                                    <tr id="sortPreviewThead">
+                                        <!-- Injected by JS -->
+                                    </tr>
+                                </thead>
+                                <tbody id="sortPreviewTbody">
+                                    <!-- Injected by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Dedicated Workbenches -->
+    <section class="workbenches-section">
+        <div class="section-heading">
+            <span class="section-tag">In-Depth Simulators</span>
+            <h2>Dedicated Hospital Management Workbenches</h2>
+            <p>Access specialized full-screen environments with live step-by-step pointers, custom dataset builders, and high-traffic stress testers.</p>
+        </div>
+
+        <div class="workbenches-grid">
+            <!-- Search Workbench Card -->
+            <div class="workbench-card">
+                <div class="workbench-header">
+                    <span class="wb-icon">🔍</span>
+                    <div>
+                        <h3>Patient & Staff Search Workbench</h3>
+                        <p class="wb-subtitle">Sequential Full Scan vs. Logarithmic Interval Bisection</p>
+                    </div>
+                </div>
+                <div class="wb-body">
+                    <ul class="wb-feature-list">
+                        <li><span class="wb-check">✓</span> Live animated comparison with visual inspection pointers</li>
+                        <li><span class="wb-check">✓</span> Search doctors, patients, appointments, or custom clinic datasets</li>
+                        <li><span class="wb-check">✓</span> High-traffic reception load simulator (50 to 10,000 patient files)</li>
+                        <li><span class="wb-check">✓</span> Real-time execution time (milliseconds) and exact check counter</li>
+                    </ul>
+                </div>
+                <div class="wb-footer">
+                    <a href="{{ url_for('search_demo') }}" class="btn-workbench btn-search">
+                        Launch Full Search Workbench →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sort Workbench Card -->
+            <div class="workbench-card">
+                <div class="workbench-header">
+                    <span class="wb-icon">📊</span>
+                    <div>
+                        <h3>Schedule & Roster Organizer Workbench</h3>
+                        <p class="wb-subtitle">Multi-Algorithm Clinical Ordering & Load Stress Testing</p>
+                    </div>
+                </div>
+                <div class="wb-body">
+                    <ul class="wb-feature-list">
+                        <li><span class="wb-check">✓</span> 3-Way head-to-head performance benchmarks on identical hospital datasets</li>
+                        <li><span class="wb-check">✓</span> Real-world hospital distribution stress tests (Morning Rush, Pre-Scheduled, Emergency)</li>
+                        <li><span class="wb-check">✓</span> Direct verification of fair, non-displacing appointment sequencing</li>
+                        <li><span class="wb-check">✓</span> Comparative metrics: Comparisons, Record Moves, Execution Speed</li>
+                    </ul>
+                </div>
+                <div class="wb-footer">
+                    <a href="{{ url_for('sort_demo') }}" class="btn-workbench btn-sort">
+                        Launch Schedule Organizer Workbench →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Practical Operations Comparison Matrix (Redesigned & Filterable) -->
+    <section class="matrix-section">
+        <div class="matrix-card">
+            <div class="matrix-header">
+                <div>
+                    <span class="section-tag">Decision Framework</span>
+                    <h2>📈 Practical Hospital Operations Comparison Matrix</h2>
+                    <p>Operational characteristics, real-world hospital advantages, and recommended workflows for each tool.</p>
+                </div>
+                
+                <!-- Table Filters -->
+                <div class="matrix-filters">
+                    <button class="filter-btn active" onclick="filterMatrix('all')">All Tools (5)</button>
+                    <button class="filter-btn" onclick="filterMatrix('search')">Search Only (2)</button>
+                    <button class="filter-btn" onclick="filterMatrix('sort')">Sorting Only (3)</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Hospital Tool</th>
+                            <th>Underlying Method</th>
+                            <th>Clinical Purpose</th>
+                            <th>Real-World Speed</th>
+                            <th>Preserves Fair Order?</th>
+                            <th>Recommended Hospital Workflow</th>
+                            <th>Quick Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixTableBody">
+                        <tr class="matrix-row row-search" data-type="search">
+                            <td>
+                                <div class="tool-name-cell">
+                                    <span class="cell-icon">🔍</span>
+                                    <div>
+                                        <strong>Flexible Medical Search</strong>
+                                        <span class="cell-tag tag-search">Sequential Scan</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Linear Item-by-Item Scan</td>
+                            <td>Finding patients by partial name, specialty keyword, or unstructured notes</td>
+                            <td><span class="speed-badge speed-fast">Instant for &lt;1,000 files</span></td>
+                            <td><span class="status-pill pill-na">N/A</span></td>
+                            <td>Reception desks handling walk-in arrivals without exact hospital IDs</td>
+                            <td>
+                                <button class="btn-matrix-action" onclick="quickFillSearch('doctors', 'name', 'Sarah', 'linear')">Test in Console</button>
+                            </td>
+                        </tr>
+
+                        <tr class="matrix-row row-search" data-type="search">
+                            <td>
+                                <div class="tool-name-cell">
+                                    <span class="cell-icon">⚡</span>
+                                    <div>
+                                        <strong>Express ID Direct Lookup</strong>
+                                        <span class="cell-tag tag-search">Interval Bisection</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Binary Interval Bisection</td>
+                            <td>Instantaneous retrieval of specific Staff Badge or Patient Intake files</td>
+                            <td><span class="speed-badge speed-instant">1 to 3 checks only</span></td>
+                            <td><span class="status-pill pill-na">N/A</span></td>
+                            <td>Emergency room triage requiring immediate record pull-up by ID</td>
+                            <td>
+                                <button class="btn-matrix-action" onclick="quickFillSearch('doctors', 'id', '101', 'binary')">Test in Console</button>
+                            </td>
+                        </tr>
+
+                        <tr class="matrix-row row-sort" data-type="sort">
+                            <td>
+                                <div class="tool-name-cell">
+                                    <span class="cell-icon">📅</span>
+                                    <div>
+                                        <strong>Schedule Priority Organizer</strong>
+                                        <span class="cell-tag tag-sort">Stable Merge</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Stable Divide-and-Conquer</td>
+                            <td>Sequencing daily consultation calendars chronologically</td>
+                            <td><span class="speed-badge speed-consistent">Consistently Rapid</span></td>
+                            <td><span class="status-pill pill-yes">✓ Yes (Guaranteed Fair)</span></td>
+                            <td>Daily booking sheets where patients at the same hour retain arrival order</td>
+                            <td>
+                                <button class="btn-matrix-action" onclick="quickFillSort('appointments', 'date', 'merge', 'asc')">Test in Console</button>
+                            </td>
+                        </tr>
+
+                        <tr class="matrix-row row-sort" data-type="sort">
+                            <td>
+                                <div class="tool-name-cell">
+                                    <span class="cell-icon">🚀</span>
+                                    <div>
+                                        <strong>Fast Division Roster Sorter</strong>
+                                        <span class="cell-tag tag-sort">In-Place Partition</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>In-Place Pivot Partitioning</td>
+                            <td>Reorganizing large hospital physician lists by division or seniority</td>
+                            <td><span class="speed-badge speed-ultra">Ultra-Fast Throughput</span></td>
+                            <td><span class="status-pill pill-no">✗ No (Reorders Ties)</span></td>
+                            <td>Alphabetical staff directories and specialty rosters across wings</td>
+                            <td>
+                                <button class="btn-matrix-action" onclick="quickFillSort('doctors', 'name', 'quick', 'asc')">Test in Console</button>
+                            </td>
+                        </tr>
+
+                        <tr class="matrix-row row-sort" data-type="sort">
+                            <td>
+                                <div class="tool-name-cell">
+                                    <span class="cell-icon">🚶</span>
+                                    <div>
+                                        <strong>Walk-In Arrival Desk Sorter</strong>
+                                        <span class="cell-tag tag-sort">Incremental Insertion</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Incremental In-Place Shift</td>
+                            <td>Adding arriving walk-in patients into current clinic rosters</td>
+                            <td><span class="speed-badge speed-fastest">Fastest for small edits</span></td>
+                            <td><span class="status-pill pill-yes">✓ Yes (Guaranteed Fair)</span></td>
+                            <td>Arriving patient intake when morning schedule is already organized</td>
+                            <td>
+                                <button class="btn-matrix-action" onclick="quickFillSort('patients', 'id', 'insertion', 'asc')">Test in Console</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Active Hospital Workflow Modules -->
+    <section class="workflows-section">
+        <div class="section-heading">
+            <span class="section-tag">Direct System Integration</span>
+            <h2>🏥 Integrated Clinical Workflows</h2>
+            <p>Search and sorting operations are deeply wired into daily hospital management views.</p>
+        </div>
+
+        <div class="workflows-grid">
+            <div class="workflow-card">
+                <div class="wf-top">
+                    <span class="wf-icon">👨‍⚕️</span>
+                    <div>
+                        <h3>Doctor Directory</h3>
+                        <p class="wf-subtitle">Physician Rosters & Specialties</p>
+                    </div>
+                </div>
+                <p class="wf-desc">Sort doctors by <strong>Staff ID</strong>, <strong>Name</strong>, or <strong>Specialization</strong>. Use Flexible Search for clinical keywords or Express ID Lookup for direct badge retrieval.</p>
+                <div class="wf-action">
+                    <a href="{{ url_for('doctors_list') }}" class="btn-wf-link">Manage Doctor Directory →</a>
+                </div>
+            </div>
+
+            <div class="workflow-card">
+                <div class="wf-top">
+                    <span class="wf-icon">👥</span>
+                    <div>
+                        <h3>Patient Intake Register</h3>
+                        <p class="wf-subtitle">Electronic Health Records</p>
+                    </div>
+                </div>
+                <p class="wf-desc">Organize patient records by <strong>Patient ID</strong>, <strong>Name</strong>, or <strong>Age</strong>. Pull up patient demographic records instantaneously when patients check in at reception.</p>
+                <div class="wf-action">
+                    <a href="{{ url_for('patients_list') }}" class="btn-wf-link">Open Patient Register →</a>
+                </div>
+            </div>
+
+            <div class="workflow-card">
+                <div class="wf-top">
+                    <span class="wf-icon">📅</span>
+                    <div>
+                        <h3>Appointment Bookings</h3>
+                        <p class="wf-subtitle">Consultation Scheduling</p>
+                    </div>
+                </div>
+                <p class="wf-desc">Sort appointments chronologically with the <strong>Schedule Priority Organizer</strong>, ensuring patients booked for the same slot strictly retain their original check-in order.</p>
+                <div class="wf-action">
+                    <a href="{{ url_for('appointments_list') }}" class="btn-wf-link">Open Appointment Bookings →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- STYLES -->
+<style>
+/* Base Phase 3 Theme */
+.phase3-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding-bottom: 60px;
+}
+
+/* Header Banner */
+.phase3-header {
+    text-align: center;
+    margin-bottom: 35px;
+    padding: 40px 25px;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0d9488 100%);
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.phase3-header::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.header-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.phase3-header h1 {
+    font-size: 1.85em;
+    margin-bottom: 12px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.phase3-header p {
+    font-size: 1.05em;
+    opacity: 0.92;
+    max-width: 850px;
+    margin: 0 auto 24px;
+}
+
+.header-stats {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.stat-pill {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 18px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.92em;
+}
+
+.stat-icon { font-size: 1.1em; }
+.stat-label { opacity: 0.9; }
+.stat-value { font-weight: 800; font-size: 1.1em; }
+
+/* Section Headings */
+.section-heading {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.section-tag {
+    display: inline-block;
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.section-heading h2 {
+    color: #0f172a;
+    font-size: 1.65em;
+    margin-bottom: 8px;
+}
+
+.section-heading p {
+    color: #64748b;
+    max-width: 750px;
+    margin: 0 auto;
+    font-size: 0.98em;
+}
+
+/* Overview Section */
+.overview-section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 40px 30px;
+    margin-bottom: 45px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.engine-group {
+    margin-bottom: 35px;
+}
+
+.engine-group:last-child {
+    margin-bottom: 0;
+}
+
+.group-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.group-icon {
+    font-size: 1.8em;
+    background: #f1f5f9;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.group-title h3 {
+    font-size: 1.25em;
+    color: #1e293b;
+    margin: 0 0 2px 0;
+}
+
+.group-title p {
+    color: #64748b;
+    font-size: 0.9em;
+    margin: 0;
+}
+
+.cards-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+/* Tool Cards */
+.tool-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    border-color: #cbd5e1;
+}
+
+.tool-card.search-theme {
+    border-top: 4px solid #0d9488;
+}
+
+.tool-card.sort-theme {
+    border-top: 4px solid #2563eb;
+}
+
+.tool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.tool-badge {
+    font-size: 0.75em;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #e2e8f0;
+    color: #475569;
+    text-transform: uppercase;
+}
+
+.badge-fast { background: #dcfce7; color: #15803d; }
+.badge-fair { background: #e0e7ff; color: #4338ca; }
+.badge-speed { background: #fee2e2; color: #b91c1c; }
+.badge-walkin { background: #fef3c7; color: #b45309; }
+
+.tool-icon {
+    font-size: 1.6em;
+}
+
+.tool-card h4 {
+    font-size: 1.18em;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.tool-desc {
+    color: #475569;
+    font-size: 0.9em;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.tool-highlights {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.highlight-item {
+    font-size: 0.84em;
+    color: #334155;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.highlight-item:last-child {
+    margin-bottom: 0;
+}
+
+.highlight-item .check {
+    color: #16a34a;
+    font-weight: 800;
+}
+
+.btn-tool-test {
+    width: 100%;
+    padding: 9px 12px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.86em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-tool-test:hover {
+    background: #0f172a;
+    color: white;
+    border-color: #0f172a;
+}
+
+/* LIVE CONSOLE */
+.live-console-section {
+    margin-bottom: 45px;
+}
+
+.console-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 35px 30px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.console-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #16a34a;
+    font-size: 0.78em;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.live-pulse {
+    width: 8px;
+    height: 8px;
+    background: #16a34a;
+    border-radius: 50%;
+    box-shadow: 0 0 0 rgba(22, 163, 74, 0.4);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+.console-title-area h2 {
+    font-size: 1.55em;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.console-title-area p {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.95em;
+}
+
+.console-tabs {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    gap: 4px;
+}
+
+.console-tab {
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.92em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.console-tab.active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.console-tab-content {
+    display: none;
+}
+
+.console-tab-content.active {
+    display: block;
+}
+
+.console-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.85em;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.form-group select,
+.form-group input {
+    padding: 11px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95em;
+    color: #0f172a;
+    background: #ffffff;
+    transition: border-color 0.2s ease;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.input-with-action {
+    display: flex;
+    gap: 8px;
+}
+
+.input-with-action input,
+.input-with-action select {
+    flex: 1;
+}
+
+.btn-console-submit {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.92em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+}
+
+.btn-console-submit:hover {
+    background: #1d4ed8;
+}
+
+.quick-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.quick-pills-label {
+    font-size: 0.82em;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.pill-btn {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pill-btn:hover {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+/* Console Output */
+.console-output {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px dashed #cbd5e1;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.output-header h4 {
+    font-size: 1.15em;
+    color: #0f172a;
+    margin: 0;
+}
+
+.execution-badge {
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 0.78em;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.metric-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+
+.metric-box.winner {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.metric-title {
+    font-size: 0.82em;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    font-size: 1.6em;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.metric-sub {
+    font-size: 0.8em;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.results-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.result-details-card,
+.result-steps-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.steps-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.steps-card-header h5 {
+    font-size: 0.98em;
+    color: #1e293b;
+    margin: 0;
+}
+
+.steps-count {
+    font-size: 0.8em;
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.steps-list {
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.86em;
+    color: #334155;
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.step-row {
+    padding: 4px 0;
+    border-bottom: 1px dotted #f1f5f9;
+}
+
+.step-row:last-child {
+    border-bottom: none;
+}
+
+.step-match {
+    color: #16a34a;
+    font-weight: 800;
+}
+
+/* Sorted Preview Table */
+.sorted-preview-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.preview-header h5 {
+    font-size: 1.05em;
+    color: #0f172a;
+    margin: 0;
+}
+
+.preview-info {
+    font-size: 0.84em;
+    color: #64748b;
+}
+
+.preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88em;
+}
+
+.preview-table th, .preview-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.preview-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.78em;
+    letter-spacing: 0.5px;
+}
+
+.preview-table tr:hover {
+    background: #fbfcfe;
+}
+
+/* Dedicated Workbenches */
+.workbenches-section {
+    margin-bottom: 45px;
+}
+
+.workbenches-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.workbench-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.workbench-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.workbench-header {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.wb-icon {
+    font-size: 2.2em;
+    background: #eff6ff;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.workbench-header h3 {
+    font-size: 1.3em;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.wb-subtitle {
+    font-size: 0.88em;
+    color: #64748b;
+    margin: 0;
+}
+
+.wb-feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+}
+
+.wb-feature-list li {
+    font-size: 0.9em;
+    color: #334155;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wb-check {
+    color: #2563eb;
+    font-weight: 800;
+}
+
+.btn-workbench {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 0.95em;
+    transition: all 0.2s ease;
+}
+
+.btn-search {
+    background: #0d9488;
+    color: white;
+}
+.btn-search:hover { background: #0f766e; color: white; }
+
+.btn-sort {
+    background: #2563eb;
+    color: white;
+}
+.btn-sort:hover { background: #1d4ed8; color: white; }
+
+/* Comparison Matrix */
+.matrix-section {
+    margin-bottom: 45px;
+}
+
+.matrix-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 35px 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.matrix-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.matrix-header h2 {
+    font-size: 1.55em;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+.matrix-header p {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.95em;
+}
+
+.matrix-filters {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+    gap: 4px;
+}
+
+.filter-btn {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.85em;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn.active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92em;
+}
+
+.matrix-table th, .matrix-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.matrix-table th {
+    background: #f8fafc;
+    color: #334155;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.5px;
+}
+
+.matrix-table tr:hover {
+    background: #fbfcfe;
+}
+
+.tool-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cell-icon {
+    font-size: 1.4em;
+}
+
+.cell-tag {
+    display: block;
+    font-size: 0.75em;
+    color: #64748b;
+}
+
+.speed-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.82em;
+    font-weight: 700;
+}
+
+.speed-instant { background: #dcfce7; color: #15803d; }
+.speed-fast { background: #e0f2fe; color: #0369a1; }
+.speed-consistent { background: #fef3c7; color: #b45309; }
+.speed-ultra { background: #fce7f3; color: #be185d; }
+.speed-fastest { background: #d1fae5; color: #047857; }
+
+.status-pill {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.82em;
+    font-weight: 700;
+}
+
+.pill-yes { background: #dcfce7; color: #15803d; }
+.pill-no { background: #fee2e2; color: #b91c1c; }
+.pill-na { background: #f1f5f9; color: #64748b; }
+
+.btn-matrix-action {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-matrix-action:hover {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+/* Workflow Modules */
+.workflows-section {
+    margin-bottom: 20px;
+}
+
+.workflows-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.workflow-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.wf-top {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.wf-icon {
+    font-size: 2em;
+}
+
+.wf-top h3 {
+    font-size: 1.15em;
+    color: #0f172a;
+    margin: 0;
+}
+
+.wf-subtitle {
+    font-size: 0.82em;
+    color: #64748b;
+    margin: 0;
+}
+
+.wf-desc {
+    color: #475569;
+    font-size: 0.88em;
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+.btn-wf-link {
+    display: inline-block;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 0.88em;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.btn-wf-link:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .grid-2, .grid-3, .console-form-grid, .workbenches-grid, .workflows-grid {
+        grid-template-columns: 1fr;
+    }
+    .results-layout {
+        grid-template-columns: 1fr;
+    }
+    .phase3-header h1 {
+        font-size: 1.5em;
+    }
+}
+</style>
+
+<!-- SCRIPT: FUNCTIONAL SEARCH & SORT CONTROLLERS -->
+<script>
+// Switch between Search and Sort Tabs in the Live Console
+function switchConsoleTab(mode) {
+    document.getElementById('tab-search-btn').classList.toggle('active', mode === 'search');
+    document.getElementById('tab-sort-btn').classList.toggle('active', mode === 'sort');
+    document.getElementById('console-tab-search').classList.toggle('active', mode === 'search');
+    document.getElementById('console-tab-sort').classList.toggle('active', mode === 'sort');
+}
+
+// Update Search By options based on dataset
+function updateSearchFields() {
+    const dataset = document.getElementById('searchDataset').value;
+    const searchBy = document.getElementById('searchBy');
+    searchBy.innerHTML = '';
+    
+    if (dataset === 'doctors') {
+        searchBy.innerHTML = `
+            <option value="id" selected>Staff / Badge ID</option>
+            <option value="name">Doctor Name</option>
+            <option value="specialization">Medical Specialty</option>
+        `;
+    } else if (dataset === 'patients') {
+        searchBy.innerHTML = `
+            <option value="id" selected>Patient Intake ID</option>
+            <option value="name">Patient Name</option>
+        `;
+    } else {
+        searchBy.innerHTML = `
+            <option value="id" selected>Appointment ID</option>
+            <option value="patient">Patient Name</option>
+            <option value="doctor">Doctor Name</option>
+            <option value="date">Date</option>
+        `;
+    }
+}
+
+// Update Sort By options based on dataset
+function updateSortFields() {
+    const dataset = document.getElementById('sortDataset').value;
+    const sortBy = document.getElementById('sortBy');
+    sortBy.innerHTML = '';
+    
+    if (dataset === 'doctors') {
+        sortBy.innerHTML = `
+            <option value="name" selected>Doctor Name (Alphabetical)</option>
+            <option value="id">Staff / Badge ID</option>
+            <option value="specialization">Medical Specialty</option>
+        `;
+    } else if (dataset === 'patients') {
+        sortBy.innerHTML = `
+            <option value="name" selected>Patient Name (Alphabetical)</option>
+            <option value="id">Patient Intake ID</option>
+            <option value="age">Age</option>
+        `;
+    } else {
+        sortBy.innerHTML = `
+            <option value="date" selected>Consultation Date & Time</option>
+            <option value="id">Appointment ID</option>
+            <option value="patient">Patient Name</option>
+            <option value="doctor">Doctor Name</option>
+            <option value="status">Status</option>
+        `;
+    }
+}
+
+// Quick presets from cards
+function presetSearch(dataset, searchBy, target, algorithm) {
+    switchConsoleTab('search');
+    document.getElementById('searchDataset').value = dataset;
+    updateSearchFields();
+    document.getElementById('searchBy').value = searchBy;
+    document.getElementById('searchTarget').value = target;
+    document.getElementById('searchAlgorithm').value = algorithm;
+    
+    const consoleEl = document.getElementById('live-console');
+    consoleEl.scrollIntoView({ behavior: 'smooth' });
+    executeLiveSearch();
+}
+
+function presetSort(dataset, sortBy, algorithm) {
+    switchConsoleTab('sort');
+    document.getElementById('sortDataset').value = dataset;
+    updateSortFields();
+    document.getElementById('sortBy').value = sortBy;
+    document.getElementById('sortAlgorithm').value = algorithm;
+    
+    const consoleEl = document.getElementById('live-console');
+    consoleEl.scrollIntoView({ behavior: 'smooth' });
+    executeLiveSort();
+}
+
+function quickFillSearch(dataset, searchBy, target, algorithm) {
+    presetSearch(dataset, searchBy, target, algorithm);
+}
+
+function quickFillSort(dataset, sortBy, algorithm, order) {
+    switchConsoleTab('sort');
+    document.getElementById('sortDataset').value = dataset;
+    updateSortFields();
+    document.getElementById('sortBy').value = sortBy;
+    document.getElementById('sortAlgorithm').value = algorithm;
+    document.getElementById('sortOrder').value = order;
+    
+    const consoleEl = document.getElementById('live-console');
+    consoleEl.scrollIntoView({ behavior: 'smooth' });
+    executeLiveSort();
+}
+
+// Filter Comparison Matrix rows
+function filterMatrix(category) {
+    const rows = document.querySelectorAll('.matrix-row');
+    const buttons = document.querySelectorAll('.filter-btn');
+    
+    buttons.forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    rows.forEach(row => {
+        if (category === 'all' || row.dataset.type === category) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// EXECUTE LIVE SEARCH
+async function executeLiveSearch(e) {
+    if (e) e.preventDefault();
+    
+    const dataset = document.getElementById('searchDataset').value;
+    const searchBy = document.getElementById('searchBy').value;
+    const algorithm = document.getElementById('searchAlgorithm').value;
+    const target = document.getElementById('searchTarget').value.trim();
+    
+    if (!target) return;
+    
+    const submitBtn = document.getElementById('searchSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>Scanning...</span> ⏳';
+    
+    try {
+        const response = await fetch('/api/search/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                dataset_type: dataset,
+                search_by: searchBy,
+                algorithm: algorithm,
+                target: target,
+                match_mode: 'contains'
+            })
+        });
+        
+        const data = await response.json();
+        renderSearchResults(data, algorithm, target);
+    } catch (err) {
+        alert('Error executing search: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Execute Search</span> 🔍';
+    }
+}
+
+function renderSearchResults(data, algorithm, target) {
+    const output = document.getElementById('searchOutput');
+    output.style.display = 'block';
+    
+    const metricsRow = document.getElementById('searchMetricsRow');
+    const resultCard = document.getElementById('searchResultCard');
+    const stepsList = document.getElementById('searchStepsList');
+    const stepsCount = document.getElementById('searchStepsCount');
+    
+    metricsRow.innerHTML = '';
+    stepsList.innerHTML = '';
+    
+    if (algorithm === 'compare') {
+        const lin = data.linear_search || {};
+        const bin = data.binary_search || {};
+        const found = lin.found || bin.found;
+        const linTime = typeof lin.time_ms === 'number' ? lin.time_ms : (typeof lin.execution_time_ms === 'number' ? lin.execution_time_ms : 0);
+        const binTime = typeof bin.time_ms === 'number' ? bin.time_ms : (typeof bin.execution_time_ms === 'number' ? bin.execution_time_ms : 0);
+        const linSteps = lin.steps || lin.trace || [];
+        const binSteps = bin.steps || bin.trace || [];
+        
+        metricsRow.innerHTML = `
+            <div class="metric-box ${lin.comparisons <= bin.comparisons ? 'winner' : ''}">
+                <div class="metric-title">🔍 Flexible Sequential Scan</div>
+                <div class="metric-value">${lin.comparisons !== undefined ? lin.comparisons : 0}</div>
+                <div class="metric-sub">Checks Performed (${linTime.toFixed(3)} ms)</div>
+            </div>
+            <div class="metric-box ${bin.comparisons <= lin.comparisons ? 'winner' : ''}">
+                <div class="metric-title">⚡ Express ID Bisection</div>
+                <div class="metric-value">${bin.comparisons !== undefined ? bin.comparisons : 0}</div>
+                <div class="metric-sub">Checks Performed (${binTime.toFixed(3)} ms)</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Hospital Search Status</div>
+                <div class="metric-value" style="color: ${found ? '#16a34a' : '#dc2626'}">
+                    ${found ? 'MATCH FOUND' : 'NOT FOUND'}
+                </div>
+                <div class="metric-sub">Target: "${target}"</div>
+            </div>
+        `;
+        
+        stepsCount.textContent = `${linSteps.length + binSteps.length} total inspection points`;
+        
+        let stepsHtml = '<strong style="color: #0d9488;">--- Express Bisection Checks ---</strong><br>';
+        binSteps.forEach(s => {
+            const isMatch = s.action === 'found' || s.found || s.matched;
+            const val = s.value !== undefined ? s.value : (s.mid_value !== undefined ? s.mid_value : 'N/A');
+            const act = s.action || s.decision || (isMatch ? 'found' : 'checking');
+            const idx = s.index !== undefined ? s.index : (s.mid !== undefined ? s.mid : 'N/A');
+            stepsHtml += `<div class="step-row ${isMatch ? 'step-match' : ''}">
+                Step ${s.step || 1}: Checked Index [${idx}], Value "${val}" → ${act}
+            </div>`;
+        });
+        
+        stepsHtml += '<br><strong style="color: #2563eb;">--- Sequential Scan Checks ---</strong><br>';
+        linSteps.slice(0, 10).forEach(s => {
+            const isMatch = s.action === 'found' || s.found || s.matched;
+            const val = s.value !== undefined ? s.value : (s.current_value !== undefined ? s.current_value : 'N/A');
+            const act = s.action || s.comparison || (isMatch ? 'found' : 'checking');
+            const idx = s.index !== undefined ? s.index : 0;
+            stepsHtml += `<div class="step-row ${isMatch ? 'step-match' : ''}">
+                Index [${idx}]: Value "${val}" → ${act}
+            </div>`;
+        });
+        if (linSteps.length > 10) {
+            stepsHtml += `<div class="step-row" style="color: #64748b;">... and ${linSteps.length - 10} more checks.</div>`;
+        }
+        stepsList.innerHTML = stepsHtml;
+        
+        renderItemDetails(resultCard, lin.item || bin.item, found);
+    } else {
+        const found = data.found;
+        const execTime = typeof data.time_ms === 'number' ? data.time_ms : (typeof data.execution_time_ms === 'number' ? data.execution_time_ms : 0);
+        const steps = data.steps || data.trace || [];
+        metricsRow.innerHTML = `
+            <div class="metric-box">
+                <div class="metric-title">Tool Executed</div>
+                <div class="metric-value" style="font-size: 1.25em;">${data.algorithm}</div>
+                <div class="metric-sub">${execTime.toFixed(3)} ms execution time</div>
+            </div>
+            <div class="metric-box winner">
+                <div class="metric-title">Checks Performed</div>
+                <div class="metric-value">${data.comparisons !== undefined ? data.comparisons : 0}</div>
+                <div class="metric-sub">Inspections in register</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Record Status</div>
+                <div class="metric-value" style="color: ${found ? '#16a34a' : '#dc2626'}">
+                    ${found ? 'MATCH FOUND' : 'NOT FOUND'}
+                </div>
+                <div class="metric-sub">Target: "${target}"</div>
+            </div>
+        `;
+        
+        stepsCount.textContent = `${steps.length} inspection points`;
+        let stepsHtml = '';
+        if (steps.length > 0) {
+            steps.slice(0, 15).forEach(s => {
+                const isMatch = s.action === 'found' || s.found || s.matched;
+                const val = s.value !== undefined ? s.value : (s.mid_value !== undefined ? s.mid_value : (s.current_value !== undefined ? s.current_value : 'N/A'));
+                const act = s.action || s.decision || s.comparison || (isMatch ? 'found' : 'checking');
+                const idx = s.index !== undefined ? s.index : (s.mid !== undefined ? s.mid : 0);
+                stepsHtml += `<div class="step-row ${isMatch ? 'step-match' : ''}">
+                    Step: Index [${idx}], Value "${val}" → ${act}
+                </div>`;
+            });
+            if (steps.length > 15) {
+                stepsHtml += `<div class="step-row" style="color: #64748b;">... and ${steps.length - 15} more checks.</div>`;
+            }
+        } else {
+            stepsHtml = '<div class="step-row">No detailed steps logged.</div>';
+        }
+        stepsList.innerHTML = stepsHtml;
+        
+        renderItemDetails(resultCard, data.item, found);
+    }
+}
+
+function renderItemDetails(container, item, found) {
+    if (!found || !item) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 25px 15px; color: #64748b;">
+                <div style="font-size: 2.2em; margin-bottom: 8px;">📂</div>
+                <h5 style="color: #1e293b; margin-bottom: 6px;">No Clinical Record Found</h5>
+                <p style="font-size: 0.88em; margin: 0;">Target does not exist in this register. Try searching for "101", "Sarah", or "Cardiology".</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `<h5 style="color: #1e293b; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">Retrieved Clinical Record</h5>`;
+    html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em;">`;
+    
+    for (const [key, val] of Object.entries(item)) {
+        html += `
+            <div style="background: #ffffff; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <span style="display: block; font-size: 0.76em; color: #64748b; text-transform: uppercase; font-weight: 700;">${key.replace(/_/g, ' ')}</span>
+                <span style="font-weight: 700; color: #0f172a;">${val}</span>
+            </div>
+        `;
+    }
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+// EXECUTE LIVE SORT
+async function executeLiveSort(e) {
+    if (e) e.preventDefault();
+    
+    const dataset = document.getElementById('sortDataset').value;
+    const sortBy = document.getElementById('sortBy').value;
+    const algorithm = document.getElementById('sortAlgorithm').value;
+    const order = document.getElementById('sortOrder').value;
+    const reverse = order === 'desc';
+    
+    const submitBtn = document.getElementById('sortSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>Sorting...</span> ⏳';
+    
+    try {
+        const response = await fetch('/api/sort/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                dataset_type: dataset,
+                sort_by: sortBy,
+                algorithm: algorithm,
+                reverse: reverse
+            })
+        });
+        
+        const data = await response.json();
+        renderSortResults(data, algorithm, dataset);
+    } catch (err) {
+        alert('Error executing sorting: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Sort Records</span> ⚡';
+    }
+}
+
+function renderSortResults(data, algorithm, dataset) {
+    const output = document.getElementById('sortOutput');
+    output.style.display = 'block';
+    
+    const metricsRow = document.getElementById('sortMetricsRow');
+    const previewThead = document.getElementById('sortPreviewThead');
+    const previewTbody = document.getElementById('sortPreviewTbody');
+    const previewInfo = document.getElementById('sortPreviewInfo');
+    
+    metricsRow.innerHTML = '';
+    previewThead.innerHTML = '';
+    previewTbody.innerHTML = '';
+    
+    let sortedList = [];
+    
+    if (algorithm === 'compare') {
+        const algs = data.algorithms || {};
+        const m = data.merge_sort || algs.merge_sort || {};
+        const q = data.quick_sort || algs.quick_sort || {};
+        const ins = data.insertion_sort || algs.insertion_sort || {};
+        sortedList = data.sorted_items || data.sorted_list || m.sorted_items || m.sorted_list || q.sorted_items || q.sorted_list || ins.sorted_items || ins.sorted_list || [];
+        
+        const mTime = typeof m.time_ms === 'number' ? m.time_ms : (typeof m.execution_time_ms === 'number' ? m.execution_time_ms : 0);
+        const qTime = typeof q.time_ms === 'number' ? q.time_ms : (typeof q.execution_time_ms === 'number' ? q.execution_time_ms : 0);
+        const insTime = typeof ins.time_ms === 'number' ? ins.time_ms : (typeof ins.execution_time_ms === 'number' ? ins.execution_time_ms : 0);
+        
+        const mMoves = m.moves !== undefined ? m.moves : (m.operations !== undefined ? m.operations : 0);
+        const qMoves = q.moves !== undefined ? q.moves : (q.operations !== undefined ? q.operations : 0);
+        const insMoves = ins.moves !== undefined ? ins.moves : (ins.operations !== undefined ? ins.operations : 0);
+        
+        metricsRow.innerHTML = `
+            <div class="metric-box ${m.comparisons <= q.comparisons && m.comparisons <= ins.comparisons ? 'winner' : ''}">
+                <div class="metric-title">📅 Schedule Organizer (Merge)</div>
+                <div class="metric-value">${m.comparisons !== undefined ? m.comparisons : 0}</div>
+                <div class="metric-sub">${mMoves} moves · ${mTime.toFixed(3)} ms · <span style="color: #16a34a; font-weight: 700;">Fair Order ✓</span></div>
+            </div>
+            <div class="metric-box ${q.comparisons <= m.comparisons && q.comparisons <= ins.comparisons ? 'winner' : ''}">
+                <div class="metric-title">🚀 Fast Division Sorter (Quick)</div>
+                <div class="metric-value">${q.comparisons !== undefined ? q.comparisons : 0}</div>
+                <div class="metric-sub">${qMoves} moves · ${qTime.toFixed(3)} ms · <span style="color: #b91c1c; font-weight: 700;">In-Place</span></div>
+            </div>
+            <div class="metric-box ${ins.comparisons <= m.comparisons && ins.comparisons <= q.comparisons ? 'winner' : ''}">
+                <div class="metric-title">🚶 Walk-In Desk Sorter (Insertion)</div>
+                <div class="metric-value">${ins.comparisons !== undefined ? ins.comparisons : 0}</div>
+                <div class="metric-sub">${insMoves} moves · ${insTime.toFixed(3)} ms · <span style="color: #16a34a; font-weight: 700;">Fair Order ✓</span></div>
+            </div>
+        `;
+    } else {
+        sortedList = data.sorted_items || data.sorted_list || [];
+        const execTime = typeof data.time_ms === 'number' ? data.time_ms : (typeof data.execution_time_ms === 'number' ? data.execution_time_ms : 0);
+        const moves = data.moves !== undefined ? data.moves : (data.operations !== undefined ? data.operations : 0);
+        const isStable = data.is_stable !== undefined ? data.is_stable : (data.stable !== undefined ? data.stable : false);
+        metricsRow.innerHTML = `
+            <div class="metric-box winner">
+                <div class="metric-title">Tool Executed</div>
+                <div class="metric-value" style="font-size: 1.3em;">${data.algorithm}</div>
+                <div class="metric-sub">${execTime.toFixed(3)} ms total execution time</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Total Comparisons</div>
+                <div class="metric-value">${data.comparisons !== undefined ? data.comparisons : 0}</div>
+                <div class="metric-sub">Pairs evaluated</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Record Movements</div>
+                <div class="metric-value">${moves}</div>
+                <div class="metric-sub">In-memory shifts</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-title">Order Stability</div>
+                <div class="metric-value" style="font-size: 1.2em; color: ${isStable ? '#16a34a' : '#b91c1c'};">
+                    ${isStable ? 'Guaranteed Fair ✓' : 'In-Place Partition'}
+                </div>
+                <div class="metric-sub">Preserves ties</div>
+            </div>
+        `;
+    }
+    
+    // Render Table Preview
+    if (sortedList && sortedList.length > 0) {
+        previewInfo.textContent = `Showing ${sortedList.length} reordered records from ${dataset}`;
+        
+        // Headers
+        const first = sortedList[0];
+        let headersHtml = '<th>#</th>';
+        for (const k of Object.keys(first)) {
+            headersHtml += `<th>${k.replace(/_/g, ' ')}</th>`;
+        }
+        previewThead.innerHTML = headersHtml;
+        
+        // Rows
+        let rowsHtml = '';
+        sortedList.slice(0, 10).forEach((item, idx) => {
+            rowsHtml += `<tr><td><strong>${idx + 1}</strong></td>`;
+            for (const val of Object.values(item)) {
+                rowsHtml += `<td>${val}</td>`;
+            }
+            rowsHtml += `</tr>`;
+        });
+        if (sortedList.length > 10) {
+            rowsHtml += `<tr><td colspan="${Object.keys(first).length + 1}" style="text-align: center; color: #64748b;">... and ${sortedList.length - 10} more records</td></tr>`;
+        }
+        previewTbody.innerHTML = rowsHtml;
+    } else {
+        previewInfo.textContent = 'No records returned';
+        previewThead.innerHTML = '<th>Info</th>';
+        previewTbody.innerHTML = '<tr><td>No records available</td></tr>';
+    }
+}
+</script>
+{% endblock %}

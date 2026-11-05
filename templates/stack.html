@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Log & Undo - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="demo-container">
+    <div class="demo-header stack-theme">
+        <h1>📑 Clinical Activity Log & Action History</h1>
+        <p>Real-time activity audit trail tracking appointment bookings, cancellations, and administrative events with instant undo capability</p>
+    </div>
+
+    <div class="stack-content">
+        <!-- Activity Log Visualization -->
+        <section class="stack-visualization">
+            <h2>Current Activity Audit Log</h2>
+            
+            <div class="stack-display-area">
+                <div class="stack-info">
+                    <p><strong>Total Logged Actions:</strong> {{ actions|length }}</p>
+                    <p><strong>Status:</strong> {% if actions %}Has {{ actions|length }} recorded action(s){% else %}Log is empty{% endif %}</p>
+                </div>
+
+                <div class="stack-visual">
+                    <div class="stack-box">
+                        <div class="stack-label">MOST RECENT EVENT</div>
+                        <div class="stack-items">
+                            {% if actions %}
+                                {% for action in actions %}
+                                    <div class="stack-item">
+                                        <span class="stack-action">{{ action }}</span>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="stack-item empty">
+                                    <span class="stack-action">No Recent Activity Recorded</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="stack-label">EARLIEST EVENT</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity Operations -->
+        <section class="stack-operations">
+            <h2>Activity Log Actions</h2>
+            
+            <div class="operations-grid">
+                <!-- Undo Operation -->
+                <div class="operation-card">
+                    <div class="operation-icon">↩️</div>
+                    <h3>Undo / Revert Most Recent Action</h3>
+                    <p>Roll back the latest administrative activity recorded in the hospital system:</p>
+                    <button class="btn btn-warning" onclick="popFromStack()" {% if not actions %}disabled{% endif %}>
+                        ↩️ Revert Last Action
+                    </button>
+                    {% if not actions %}
+                        <p class="operation-note text-muted">Log is currently empty</p>
+                    {% endif %}
+                </div>
+
+                <!-- Record Activity Operation -->
+                <div class="operation-card">
+                    <div class="operation-icon">📝</div>
+                    <h3>Create New Clinical Event</h3>
+                    <p>Perform an action in the system to automatically record a new entry into the audit trail:</p>
+                    <div class="quick-links">
+                        <a href="{{ url_for('add_appointment') }}" class="btn btn-primary btn-small">Book Appointment</a>
+                        <a href="{{ url_for('appointments_list') }}" class="btn btn-secondary btn-small">Cancel Appointment</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practical Audit Architecture Guide -->
+        <section class="concepts-section">
+            <h2>💡 Hospital Activity Audit & Undo Architecture</h2>
+            <div class="concepts-grid">
+                <div class="concept-card">
+                    <h3>Sequential Activity Logging</h3>
+                    <p>Every booking, rescheduling, or cancellation automatically logs an timestamped event so reception and clinical desks have a clear audit trail.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Immediate Undo Capability</h3>
+                    <p>Allows clinical administrators to immediately reverse mistaken cancellations or incorrect bookings in reverse chronological order.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Transparent Operational History</h3>
+                    <p>Keeps the most recent administrative event at the top of the timeline for fast inspection during shift handovers.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Audit Trail Reliability</h3>
+                    <p>Ensures patient appointment changes are strictly tracked without losing historical administrative context.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.stack-theme {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.stack-theme h1 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+}
+
+.stack-theme p {
+    margin: 0;
+    opacity: 0.95;
+    font-size: 1.05em;
+}
+
+.stack-visualization, .stack-operations, .concepts-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.stack-visualization h2, .stack-operations h2, .concepts-section h2 {
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+.stack-display-area {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+.stack-info {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.stack-info p {
+    margin: 8px 0;
+    color: #334155;
+    font-size: 0.95em;
+}
+
+.stack-visual {
+    display: flex;
+    justify-content: center;
+}
+
+.stack-box {
+    border: 3px solid #f59e0b;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 10px;
+    background: #f8fafc;
+    min-width: 380px;
+    max-width: 500px;
+    width: 100%;
+}
+
+.stack-label {
+    text-align: center;
+    color: #d97706;
+    font-weight: bold;
+    font-size: 0.82em;
+    padding: 6px 0;
+    letter-spacing: 0.5px;
+}
+
+.stack-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0;
+    min-height: 120px;
+}
+
+.stack-item {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    padding: 12px 16px;
+    border-radius: 6px;
+    text-align: center;
+    color: #92400e;
+    font-weight: 500;
+    font-size: 0.9em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.stack-item.empty {
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    color: #94a3b8;
+}
+
+.operations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.operation-card {
+    background: #f8fafc;
+    padding: 24px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.operation-icon {
+    font-size: 2.2em;
+    margin-bottom: 12px;
+}
+
+.operation-card h3 {
+    margin: 0 0 10px 0;
+    color: #1e293b;
+    font-size: 1.15em;
+}
+
+.operation-card p {
+    color: #64748b;
+    font-size: 0.92em;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.quick-links {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 0.88em;
+}
+
+.concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.concept-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.concept-card h3 {
+    color: #d97706;
+    margin-bottom: 8px;
+    font-size: 1.05em;
+}
+
+.concept-card p {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.92em;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .stack-display-area, .operations-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function popFromStack() {
+    if (confirm('Revert the most recent administrative action?')) {
+        fetch('/api/stack/pop', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Reverted: ' + data.action);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+</script>
+{% endblock %}

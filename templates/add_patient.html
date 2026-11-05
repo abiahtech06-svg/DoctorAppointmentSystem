@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Intake & Registration - Doctor Appointment Booking and Management System{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <span style="font-size: 2.2em;">👥</span>
+            <div>
+                <h1 style="margin: 0; color: #1e293b; font-size: 1.6em;">Patient Intake &amp; Triage Registration</h1>
+                <p class="subtitle" style="margin: 0; color: #64748b; font-size: 0.9em;">Register walk-in or new outpatient and check into live waiting line</p>
+            </div>
+        </div>
+        
+        <form method="POST" class="form" style="margin-top: 20px;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="patient_id">Patient Medical Record ID <span style="font-weight: normal; color: #64748b;">(Auto-assigned)</span></label>
+                    <input type="number" id="patient_id" name="patient_id" value="{{ suggested_id or '' }}" placeholder="Auto-generated ID" style="background: #f8fafc;">
+                </div>
+                <div class="form-group">
+                    <label for="patient_name">Patient Full Name</label>
+                    <input type="text" id="patient_name" name="patient_name" required placeholder="e.g., Jonathan Doe">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" name="age" required placeholder="e.g., 35" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">-- Select gender --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Contact Phone</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="e.g., 555-0210">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="e.g., patient@example.com">
+                </div>
+            </div>
+
+            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; font-size: 0.88em; color: #166534;">
+                🎫 <strong>Automatic Triage Queue Check-In:</strong> Registering this patient immediately places them in the live outpatient waiting room line for doctor examination.
+            </div>
+            
+            <div class="form-actions" style="margin-top: 15px;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px; font-weight: 700;">Complete Intake &amp; Check In</button>
+                <a href="{{ url_for('patients_list') }}" class="btn btn-secondary" style="padding: 12px; text-align: center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-container {
+    display: flex;
+    justify-content: center;
+    padding: 30px 15px;
+}
+
+.form-card {
+    background: white;
+    padding: 35px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    max-width: 650px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.9em;
+    color: #334155;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95em;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4338ca;
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.form-actions .btn {
+    flex: 1;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Register Specialist Doctor - Doctor Appointment Booking and Management System{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <span style="font-size: 2.2em;">👨‍⚕️</span>
+            <div>
+                <h1 style="margin: 0; color: #1e293b; font-size: 1.6em;">Register Medical Specialist</h1>
+                <p class="subtitle" style="margin: 0; color: #64748b; font-size: 0.9em;">Onboard a new physician to hospital clinical divisions</p>
+            </div>
+        </div>
+        
+        <form method="POST" class="form" style="margin-top: 20px;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="doctor_id">Staff Doctor ID <span style="font-weight: normal; color: #64748b;">(Auto-assigned)</span></label>
+                    <input type="number" id="doctor_id" name="doctor_id" value="{{ suggested_id or '' }}" placeholder="Auto-generated ID" style="background: #f8fafc;">
+                </div>
+                <div class="form-group">
+                    <label for="doctor_name">Doctor Full Name</label>
+                    <input type="text" id="doctor_name" name="doctor_name" required placeholder="e.g., Dr. Eleanor Vance, MD">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="specialization">Medical Specialization</label>
+                    <select id="specialization" name="specialization" required>
+                        <option value="">-- Select clinical specialty --</option>
+                        <option value="Cardiology">Cardiology (Clinical Division)</option>
+                        <option value="Neurology">Neurology (Clinical Division)</option>
+                        <option value="General Medicine">General Medicine (Clinical Division)</option>
+                        <option value="Orthopedics">Orthopedics (Surgical Division)</option>
+                        <option value="General Surgery">General Surgery (Surgical Division)</option>
+                        <option value="Pediatrics">Pediatrics</option>
+                        <option value="Dermatology">Dermatology</option>
+                        <option value="Oncology">Oncology</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Contact</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="e.g., 555-0199">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Hospital Email</label>
+                    <input type="email" id="email" name="email" required placeholder="e.g., evance@hospital.com">
+                </div>
+                <div class="form-group">
+                    <label for="available_day">Available Schedule</label>
+                    <select id="available_day" name="available_day">
+                        <option value="Daily">Daily (Mon - Sun)</option>
+                        <option value="Monday - Friday" selected>Monday - Friday</option>
+                        <option value="Tuesday - Saturday">Tuesday - Saturday</option>
+                        <option value="Monday - Thursday">Monday - Thursday</option>
+                        <option value="Wednesday - Sunday">Wednesday - Sunday</option>
+                        <option value="Weekends Only">Weekends Only</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="available_time">Consultation Hours</label>
+                <input type="text" id="available_time" name="available_time" value="09:00 AM - 17:00 PM" placeholder="e.g., 09:00 AM - 17:00 PM">
+            </div>
+
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px; border-radius: 6px; font-size: 0.88em; color: #1e40af;">
+                ⚡ <strong>Instant High-Speed Indexing:</strong> The new specialist profile is automatically indexed in the Hospital BST for instant search and connected to hospital corridor navigation.
+            </div>
+            
+            <div class="form-actions" style="margin-top: 15px;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px; font-weight: 700;">Register &amp; Index Doctor</button>
+                <a href="{{ url_for('doctors_list') }}" class="btn btn-secondary" style="padding: 12px; text-align: center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-container {
+    display: flex;
+    justify-content: center;
+    padding: 30px 15px;
+}
+
+.form-card {
+    background: white;
+    padding: 35px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    max-width: 650px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.9em;
+    color: #334155;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95em;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4338ca;
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.form-actions .btn {
+    flex: 1;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

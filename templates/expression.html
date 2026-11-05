@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}Dosage & Prescription Validator - Doctor Appointment System{% endblock %}
+
+{% block content %}
+<div class="demo-container">
+    <div class="demo-header expression-theme">
+        <h1>💊 Medical Dosage & Prescription Formula Validator</h1>
+        <p>Verify syntax, dosing units, and bracket structure of complex dosage formulas, compounding recipes, and pediatric measurements</p>
+    </div>
+
+    <div class="expression-content">
+        <!-- Input Section -->
+        <section class="input-section">
+            <h2>Validate Prescription & Dosage Notation</h2>
+            
+            <div class="input-box">
+                <p>Enter a clinical dosage formula or pharmaceutical compounding notation to verify its structural balance and syntax:</p>
+                
+                <div class="input-form">
+                    <textarea id="expression-input" class="expression-input" placeholder="Example: (500mg + 250mg) * [2 doses / {24 hours}]" rows="3"></textarea>
+                    
+                    <div class="supported-brackets">
+                        <p><strong>Supported Formula Enclosures:</strong></p>
+                        <p>
+                            <span class="bracket-type">( ) Standard Parentheses</span>
+                            <span class="bracket-type">{ } Compounding Braces</span>
+                            <span class="bracket-type">[ ] Dosage Brackets</span>
+                        </p>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-validate" onclick="validateExpression()">✓ Validate Dosage Formula</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section" id="results-section" style="display: none;">
+            <h2>Dosage Syntax Check Results</h2>
+            
+            <div class="results-container">
+                <div class="result-card" id="result-card">
+                    <!-- Populated via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section class="examples-section">
+            <h2>📋 Standard Hospital Prescription Formula Examples</h2>
+            
+            <div class="examples-grid">
+                <div class="example-card valid">
+                    <h4>✓ Valid: Adult Dual-Antibiotic Schedule</h4>
+                    <code>(500mg + 250mg) * [2 doses / {24 hours}]</code>
+                    <p class="example-desc">Properly nested dosage multiplier.</p>
+                    <button class="btn btn-secondary btn-small" onclick="testExpression('(500mg + 250mg) * [2 doses / {24 hours}]')">Test Formula</button>
+                </div>
+
+                <div class="example-card valid">
+                    <h4>✓ Valid: Pediatric Weight-Based Regimen</h4>
+                    <code>{[15mg/kg * 20kg] + (5ml saline)} / (8 hours)</code>
+                    <p class="example-desc">Multi-tier pediatric calculation.</p>
+                    <button class="btn btn-secondary btn-small" onclick="testExpression('{[15mg/kg * 20kg] + (5ml saline)} / (8 hours)')">Test Formula</button>
+                </div>
+
+                <div class="example-card invalid">
+                    <h4>✗ Invalid: Unclosed Infusion Bracket</h4>
+                    <code>(250mg * [3 doses / 12 hours)</code>
+                    <p class="example-desc">Mismatched bracket pair: opened '[' but closed with ')'.</p>
+                    <button class="btn btn-secondary btn-small" onclick="testExpression('(250mg * [3 doses / 12 hours)')">Test Formula</button>
+                </div>
+
+                <div class="example-card invalid">
+                    <h4>✗ Invalid: Inverted Chemotherapy Formula</h4>
+                    <code>[(100mg + 50mg] * {2 cycles})</code>
+                    <p class="example-desc">Improper nesting sequence.</p>
+                    <button class="btn btn-secondary btn-small" onclick="testExpression('[(100mg + 50mg] * {2 cycles})')">Test Formula</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practical Pharmacy Guide -->
+        <section class="concepts-section">
+            <h2>💡 Medication Safety & Dosage Notation Architecture</h2>
+            <div class="concepts-grid">
+                <div class="concept-card">
+                    <h3>Preventing Adverse Medication Errors</h3>
+                    <p>Automated formula checking prevents miscalculations in multi-step infusions, pediatric dosing, and complex chemotherapy regimens.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Pharmacy Compounding Quality Control</h3>
+                    <p>Ensures that clinical compounding instructions sent from physicians to the hospital dispensary follow exact mathematical syntax.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Real-Time Syntax Feedback</h3>
+                    <p>Flags unclosed brackets, missing delimiters, or inverted parameters instantly before prescriptions are signed into patient charts.</p>
+                </div>
+                <div class="concept-card">
+                    <h3>Clinical Protocol Compliance</h3>
+                    <p>Standardizes hospital medical orders according to clinical safety protocols and joint commission quality standards.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.expression-theme {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%) !important;
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.expression-theme h1 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+}
+
+.expression-theme p {
+    margin: 0;
+    opacity: 0.95;
+    font-size: 1.05em;
+}
+
+.input-section, .results-section, .examples-section, .concepts-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.input-section h2, .results-section h2, .examples-section h2, .concepts-section h2 {
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+.input-box {
+    background: #f8fafc;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.input-box > p {
+    color: #475569;
+    margin-bottom: 15px;
+    font-size: 0.95em;
+}
+
+.expression-input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1.05em;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 15px;
+    resize: vertical;
+}
+
+.expression-input:focus {
+    border-color: #8b5cf6;
+    outline: none;
+}
+
+.supported-brackets {
+    margin-bottom: 20px;
+}
+
+.supported-brackets p {
+    margin: 6px 0;
+    color: #475569;
+    font-size: 0.9em;
+}
+
+.bracket-type {
+    display: inline-block;
+    background: #ede9fe;
+    color: #6d28d9;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-right: 8px;
+    font-size: 0.88em;
+    font-weight: 500;
+}
+
+.btn-validate {
+    padding: 12px 24px;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.result-card {
+    background: #f8fafc;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.validation-status {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.status-pass {
+    color: #16a34a;
+}
+
+.status-fail {
+    color: #dc2626;
+}
+
+.validation-message {
+    color: #475569;
+    margin-bottom: 20px;
+    font-size: 1.05em;
+}
+
+.stack-trace {
+    background: white;
+    padding: 18px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.stack-trace h4 {
+    margin: 0 0 12px 0;
+    color: #1e293b;
+}
+
+.trace-item {
+    padding: 6px 12px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.88em;
+}
+
+.trace-item.success {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.trace-item.error {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.example-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.example-card.valid {
+    border-left: 4px solid #16a34a;
+}
+
+.example-card.invalid {
+    border-left: 4px solid #dc2626;
+}
+
+.example-card h4 {
+    margin: 0 0 10px 0;
+    color: #1e293b;
+    font-size: 1em;
+}
+
+.example-card code {
+    background: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9em;
+    color: #4f46e5;
+    margin-bottom: 10px;
+    display: block;
+    word-break: break-all;
+}
+
+.example-desc {
+    color: #64748b;
+    font-size: 0.88em;
+    margin-bottom: 15px;
+    flex-grow: 1;
+}
+
+.concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.concept-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #8b5cf6;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.concept-card h3 {
+    color: #6d28d9;
+    margin-bottom: 8px;
+    font-size: 1.05em;
+}
+
+.concept-card p {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.92em;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .examples-grid, .concepts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function validateExpression() {
+    const expression = document.getElementById('expression-input').value.trim();
+    
+    if (!expression) {
+        alert('Please enter a prescription formula or dosage notation');
+        return;
+    }
+    
+    fetch('/api/validate-expression', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            expression: expression
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayResults(data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during validation');
+    });
+}
+
+function testExpression(expression) {
+    document.getElementById('expression-input').value = expression;
+    validateExpression();
+}
+
+function displayResults(data) {
+    const resultsSection = document.getElementById('results-section');
+    const resultCard = document.getElementById('result-card');
+    
+    let statusClass = data.is_balanced ? 'status-pass' : 'status-fail';
+    let statusText = data.is_balanced ? '✓ FORMULA SYNTAX VALID (BALANCED)' : '✗ SYNTAX ERROR (UNBALANCED DELIMITERS)';
+    
+    let html = `
+        <div class="validation-status ${statusClass}">${statusText}</div>
+        <div class="validation-message">${data.message}</div>
+        
+        <div class="stack-trace">
+            <h4>Dosage Enclosure Syntax Verification Steps:</h4>
+            ${data.stack_trace.map(step => {
+                let traceClass = step.includes('MISMATCH') || step.includes('FAILED') || step.includes('empty') || step.includes('NOT empty') ? 'error' : 'success';
+                return `<div class="trace-item ${traceClass}">${step}</div>`;
+            }).join('')}
+        </div>
+    `;
+    
+    resultCard.innerHTML = html;
+    resultsSection.style.display = 'block';
+    resultsSection.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+{% endblock %}
